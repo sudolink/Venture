@@ -88,6 +88,7 @@ class gameField():
 		#make genesis here, it randomly appends itself
 		self.genesisMap("placeholder")
 
+
 		
 
 	def makeGrid(self):
@@ -100,6 +101,7 @@ class gameField():
 				grid_size = num
 				leftover = self.numberOfMaps - (num*num)
 				print("\nGrid size is:{}x{} Leftover is: {}".format(grid_size,grid_size,leftover))
+
 				#highest num whose (num*num) result fits into self.numberOfMaps
 				#break, because we've found the best candidate
 				break
@@ -112,6 +114,7 @@ class gameField():
 		#some quality of life improvements, definitions for easier use and testing purposes below
 		list_of_rows = [row for row in dir(self) if "row" in row]
 		dictofrows= {k:v for k,v in self.__dict__.items() if "row" in k}
+
 		print(list_of_rows,"\n",dictofrows)
 		
 		    ###full grid here
@@ -124,6 +127,7 @@ class gameField():
 			row +=1 #increment to next row
 			if row > len(list_of_rows)-1: #when row number > number of object's row{x} attributes, reset to 0
 				row = 0
+	
 		self.showGrid()
 
 
@@ -149,4 +153,3 @@ class gameField():
 		maps(map_desc.pop())
 		self.__dict__[randomrow][randomcoord] = genesis
 		self.showGrid()
-		pass
