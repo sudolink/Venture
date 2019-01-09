@@ -79,14 +79,14 @@ class gameField():
 
 
 		#call generator function here
-		#self.generateMaps()
+		self.generateMap()
 
 
 	def generateMap(self):
 		justPlaced = self.genesis_location
 
 		#make genesis here, it randomly appends itself
-		
+		self.genesisMap("placeholder")
 
 		
 
@@ -112,10 +112,11 @@ class gameField():
 		#some quality of life improvements, definitions for easier use and testing purposes below
 		list_of_rows = [row for row in dir(self) if "row" in row]
 		dictofrows= {k:v for k,v in self.__dict__.items() if "row" in k}
+		print(list_of_rows,"\n",dictofrows)
 		
 		    ###full grid here
 		coordinate_names = ["c{}".format(coordinate) for coordinate in range(self.numberOfMaps)] #list of all coordinates for this gamefield c0-c99
-		#dictofrows["row0"]["c0"] = "none"
+		#dictofrows["row0"]["c0"] = "placeholder"
 
 		row = 0 #start on row 0
 		for coordinate in coordinate_names:
@@ -129,12 +130,23 @@ class gameField():
 
 	def showGrid(self):
 		print("\nTESTING! This will be the game map")
-		self.rows = {k:v for k,v in self.__dict__.items() if "row" in k}
-		for y in self.rows.values():
+		rows = {k:v for k,v in self.__dict__.items() if "row" in k}
+		for y in rows.values():
 			print([x for x in y.values()])
+
+		#SET UP AS IT IS FOR TESTING PURPOSES
+		#YOU'LL HAVE TO MODIFY THIS TO ACCESS THE MAP OBJECT'S NAME?
+		#ONLY SHOW WHAT HAS BEEN EXPLORED?
 
 
 
 
 	def genesisMap(self,player1):
+		genesis = maps(map_desc.pop())
+		randomrow = random.choice([row for row in self.__dict__ if "row" in row])
+		randomcoord = random.choice([coord for coord in self.__dict__[randomrow]])
+		print("\nRandom row: {}\tRandom coord: {}".format(randomrow,randomcoord))
+		maps(map_desc.pop())
+		self.__dict__[randomrow][randomcoord] = genesis
+		self.showGrid()
 		pass
