@@ -83,7 +83,6 @@ class gameField():
 
 
 	def generateMap(self):
-		print("Number of maps to append: {}\nNumber of emptySlots: {}".format(self.numberOfMaps,self.emptySlots))
 		justPlaced = self.genesis_location
 
 		#make genesis here, it randomly appends itself
@@ -92,7 +91,7 @@ class gameField():
 		
 
 	def makeGrid(self):
-		print(self.numberOfMaps)
+		print("{} map slots to create".format(self.numberOfMaps))
 		grid_size = None #(number of lists and slots, times to append additional slots)
 		leftover = None
 		#determine grid parameters here
@@ -100,7 +99,7 @@ class gameField():
 			if num * num <= self.numberOfMaps:
 				grid_size = num
 				leftover = self.numberOfMaps - (num*num)
-				print("\n\nGrid size is:{}x{} Leftover is: {}".format(grid_size,grid_size,leftover))
+				print("\nGrid size is:{}x{} Leftover is: {}".format(grid_size,grid_size,leftover))
 				#highest num whose (num*num) result fits into self.numberOfMaps
 				#break, because we've found the best candidate
 				break
@@ -113,8 +112,6 @@ class gameField():
 		#some quality of life improvements, definitions for easier use and testing purposes below
 		list_of_rows = [row for row in dir(self) if "row" in row]
 		dictofrows= {k:v for k,v in self.__dict__.items() if "row" in k}
-		print("\nList of row names: {}".format(list_of_rows))
-		print("Dict of row names and their dictionaries:\n {}".format(dictofrows))
 		
 		    ###full grid here
 		coordinate_names = ["c{}".format(coordinate) for coordinate in range(self.numberOfMaps)] #list of all coordinates for this gamefield c0-c99
@@ -126,20 +123,15 @@ class gameField():
 			row +=1 #increment to next row
 			if row > len(list_of_rows)-1: #when row number > number of object's row{x} attributes, reset to 0
 				row = 0
-	
-		from functools import reduce #checking of number of created slots is right
-		print(reduce((lambda x,y: x+y),[len(v) for k,v in self.__dict__.items() if "row" in k]))
-	
 		self.showGrid()
 
 
 
 	def showGrid(self):
-		print("\nTESTING! This is the game map")
+		print("\nTESTING! This will be the game map")
 		self.rows = {k:v for k,v in self.__dict__.items() if "row" in k}
-		for x,y in self.rows.items():
-			#how do I make a list of only the values the coordinate names have, or only of coordinate names for that matter?
-			print(y)
+		for y in self.rows.values():
+			print([x for x in y.values()])
 
 
 
