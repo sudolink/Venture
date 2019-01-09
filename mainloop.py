@@ -1,6 +1,6 @@
 #Venture mainloop
 
-import game_maps
+import maps
 import player
 import item
 import inputHandler
@@ -23,7 +23,7 @@ player1 = None
 #inputHandler.clearScreen()
 
 #make the starting area
-gField = game_maps.gameField()
+gField = maps.gameField()
 player1 = player.player()
 quit()
 
