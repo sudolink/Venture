@@ -75,10 +75,7 @@ class gameField():
 		##	gamefield lists
 		######
 		self.makeGrid() #generates quadrant lists
-		self.dict_of_quadrants = {name:val for name,val in self.__dict__.items() if "quadrant_" in name}
-		self.list_of_quadrants = [name for name in self.dict_of_quadrants]
 		print()
-		self.generateMap()
 		self.showGrid() #show gameMap
 
 
@@ -93,46 +90,8 @@ class gameField():
 		#make genesis here, it randomly appends itself
 		self.genesisMap(self.player1)
 		
-		#append maps here
-		#use gridlocationgenerator to yield random locations
-		#only append if location is adjacent to a map and doesn't contain a map
-		for location in self.gridLocationGenerator():
-			quadrant,index = location[0],location[1]
-			location = self.__dict__[quadrant][index]
-			if location != "map" and location != "genesis": #if location doesn't contain a map object
-				if self.isAdjacentToAnyMap((quadrant,index)):
-					self.__dict__[quadrant][index] = "map" #append a map new object
-					self.numberOfMaps -= 1
-				else:
-					pass
-
-	def isAdjacentToAnyMap(self,location):
-		isAdjacent = False
-		location = location
-		quadrant,quadrant_num,index = location[0][0:-1],location[0][-1],location[1]
 
 
-		trythese = {"quadrant_{}".format(str(int(quadrant_num)+1)):index,\
-		"quadrant_{}".format(str(int(quadrant_num)-1)):index,\
-		"quadrant_{}".format(quadrant_num):index+1,\
-		"quadrant_{}".format(quadrant_num):index-1,\
-		}#HEREIN LIES THE ISSUE TO MAP OBJECTS NOT BEING CONNECTED
-		#IF AN INDEX OF 0 IS PASSED ALONG, THEN IT'S MODIFIED TO BE -1, WHICH PUTS THE LOCATION TO THE END OF THE LIST
-		#IT'S STILL CONSIDEREND TO BE 'ADJACENT' SINCE LISTS CAN LOOP LIKE THAT.
-		#UNHELPFUL TO MY CAUSE HOWEVER AND I'LL NEED TO FIGURE THIS OUT.
-		#DREADING HAVING TO MIGRATE EVERYTHING INTO DICTIONARIES.
-		
-		for q,i in trythese.items():
-			try:
-				trie = self.__dict__[q][i]
-			except:
-				continue
-				print("pasd")
-			else:
-				if trie == "map" or trie == "genesis":
-					isAdjacent = True
-
-		return isAdjacent
 		
 	def gridLocationGenerator(self):
 		print("List of quadrants: {}".format(self.list_of_quadrants))
@@ -161,19 +120,7 @@ class gameField():
 		##GRID BUILDING BELOW
 		    ###basic grid here
 		list_contents = ["00"]
-		for iteration in range(grid_size):#number of lists and their slots
-			setattr(self,"quadrant_{}".format(iteration+1),list_contents*grid_size)
-		    ###append leftover slots to basic grid below
-		while leftover > 0: #while still items to append
-			for pair in {k:v for k,v in self.__dict__.items() if "quadrant" in str(k)}: #if object attribute is quadrant, append a slot
-				if leftover > 0: #inner check, otherwise it iterates through the whole dict even if leftover is 0
-					#append slot
-					self.__dict__[str(pair)].append("??")
-					#one less to append
-					leftover -= 1
-				else:
-					#nothing left to append
-					pass
+		
 		    
 	def showGrid(self):
 		print("\nTESTING! This is the game map")
