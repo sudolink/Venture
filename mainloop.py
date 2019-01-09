@@ -17,7 +17,6 @@ visited_areas = []
 area = None
 player1 = None
 
-
 #TESTING PHASE
 ###FIGURE OUT A NICE WAY OF DOING THESE
 
@@ -26,7 +25,6 @@ player1 = None
 #make the starting area
 gField = game_maps.gameField()
 player1 = player.player()
-
 quit()
 
 #main loop

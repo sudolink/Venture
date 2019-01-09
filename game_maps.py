@@ -67,16 +67,15 @@ class gameField():
 	def __init__(self):
 		self.player1 = None
 		self.currentMap = None
-		self.numberOfMaps = random.randint(5,8)#for testing purposes keep between 1 and 5	
-		self.emptySlots = int(self.numberOfMaps / 2) + 3
+		self.numberOfMaps = random.randint(5,25)
 		self.genesis_location = tuple()
-		print(self.genesis_location)
+			#print(self.genesis_location)
 		########################################
 		##	gamefield lists
 		######
 		self.makeGrid() #generates quadrant lists
-		print()
-		self.showGrid() #show gameMap
+			#print()
+			#self.showGrid() #show gameMap
 
 
 		#call generator function here
@@ -88,56 +87,62 @@ class gameField():
 		justPlaced = self.genesis_location
 
 		#make genesis here, it randomly appends itself
-		self.genesisMap(self.player1)
 		
 
-
-		
-	def gridLocationGenerator(self):
-		print("List of quadrants: {}".format(self.list_of_quadrants))
-		while self.numberOfMaps > 0:
-			random_quadrant = random.choice(self.list_of_quadrants)
-			random_index = random.randint(0,len(self.dict_of_quadrants[random_quadrant])-1)
-			yield (random_quadrant,random_index)
-			#find an available location adjacent to the previously placed map.
-			#yield location	
 		
 
 	def makeGrid(self):
-		numberofSlots = self.numberOfMaps + self.emptySlots
+		print(self.numberOfMaps)
 		grid_size = None #(number of lists and slots, times to append additional slots)
 		leftover = None
 		#determine grid parameters here
-		for num in range(numberofSlots,0,-1):#from number of slots, iterate down to zero
-			if num * num <= numberofSlots:
+		for num in range(self.numberOfMaps,0,-1):#from number of slots, iterate down to zero
+			if num * num <= self.numberOfMaps:
 				grid_size = num
-				leftover = numberofSlots - (num*num)
-				#print("\n\nGrid size is:{} Leftover is: {}".format(grid_size,leftover))
-				#highest num whose (num*num) result fits into numberOfSlots
+				leftover = self.numberOfMaps - (num*num)
+				print("\n\nGrid size is:{}x{} Leftover is: {}".format(grid_size,grid_size,leftover))
+				#highest num whose (num*num) result fits into self.numberOfMaps
 				#break, because we've found the best candidate
 				break
 
 		##GRID BUILDING BELOW
-		    ###basic grid here
-		list_contents = ["00"]
+		#making the object attributes
+		for i in range(grid_size):
+			setattr(self,"row{}".format(i),{})
+
+		#some quality of life improvements, definitions for easier use and testing purposes below
+		list_of_rows = [row for row in dir(self) if "row" in row]
+		dictofrows= {k:v for k,v in self.__dict__.items() if "row" in k}
+		print("\nList of row names: {}".format(list_of_rows))
+		print("Dict of row names and their dictionaries:\n {}".format(dictofrows))
 		
-		    
+		    ###full grid here
+		coordinate_names = ["c{}".format(coordinate) for coordinate in range(self.numberOfMaps)] #list of all coordinates for this gamefield c0-c99
+		#dictofrows["row0"]["c0"] = "none"
+
+		row = 0 #start on row 0
+		for coordinate in coordinate_names:
+			dictofrows["row{}".format(row)][coordinate] = "-"
+			row +=1 #increment to next row
+			if row > len(list_of_rows)-1: #when row number > number of object's row{x} attributes, reset to 0
+				row = 0
+	
+		from functools import reduce #checking of number of created slots is right
+		print(reduce((lambda x,y: x+y),[len(v) for k,v in self.__dict__.items() if "row" in k]))
+	
+		self.showGrid()
+
+
+
 	def showGrid(self):
 		print("\nTESTING! This is the game map")
-		self.quadrants = {att:val for att,val in self.__dict__.items() if att in ["quadrant_0","quadrant_1","quadrant_2","quadrant_3","quadrant_4","quadrant_5","quadrant_6"]}
-		for quadrant,slots in self.quadrants.items():
-			print(quadrant,slots)
+		self.rows = {k:v for k,v in self.__dict__.items() if "row" in k}
+		for x,y in self.rows.items():
+			#how do I make a list of only the values the coordinate names have, or only of coordinate names for that matter?
+			print(y)
 
 
 
 
 	def genesisMap(self,player1):
-		random_quadrant = random.choice(self.list_of_quadrants)
-		random_index = random.randint(1,len(self.dict_of_quadrants[random_quadrant])-1)
-		self.dict_of_quadrants[random_quadrant].pop(random_index)
-		#genesis = self.maps(map_desc.pop())
-		#map.acceptplayer
-		#genesis.takeItems(item.itempopulator300("Genesis"))
-		#map.describeyourself
-		self.dict_of_quadrants[random_quadrant].insert(random_index,"genesis")#map object
-		self.genesis_location = (random_quadrant,random_index)
+		pass
