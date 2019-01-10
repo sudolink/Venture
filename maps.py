@@ -94,8 +94,6 @@ class gameField():
 			#until map is placed, keep trying
 			notPlaced = True
 			while notPlaced:
-				#RANDOM IS BRUTE FORCING
-				#NEED TO MAKE A POPPABLE LIST FROM WHICH IT WILL RANDOM PICK
 				randomrow = random.choice([row for row in self.__dict__ if "row" in row])
 				randomcoord = random.choice([coord for coord in self.__dict__[randomrow]])
 				
@@ -122,10 +120,11 @@ class gameField():
 
 	def checkIfAdjacent(self,location):
 		#print("\ncheckIfAdjacent checks if new random position is adjacent to any existing map\n")
-		#print("\nThese are all used map coordinates:\n{}".format(self.allmapcoords))
+		print("\nThese are all used map coordinates:\n{}".format(self.allmapcoords))
 		isAdjacent = False
 		nowrow = location[0]
 		nowcoord = location[1]
+		print("\t\tCHECK FOR THIS LOC: {}".format((nowrow,nowcoord)))
 			#checking row above
 		rowup = str(nowrow[0:-1]+str(int(nowrow[-1])+1))
 		coordup = str(nowcoord[0:-1]+str(int(nowcoord[-1])+1))
@@ -136,6 +135,12 @@ class gameField():
 		coordleft = str(nowcoord[0:-1]+str(int(nowcoord[-1])-2))
 		coordright = str(nowcoord[0:-1]+str(int(nowcoord[-1])+2))
 		possibleChecks = [(rowup,coordup),(rowdown,coorddown),(nowrow,coordleft),(nowrow,coordright)]
+
+		#########################################################################################
+		#PROBLEM HERE. DIFFERENT SIZED GRIDS CREATE DIFFERENT SIZED DIFFERENCES (HUH? NO SHIT?)
+		#SO THE ABOVE DEFINITIONS ARE USELESS, SAVE FOR 3X3 GRIDS.
+		#I'LL HAVE TO FETCH GRID NAMES AND COORDS MANUALLY, FOR EACH POSSIBLE COMBINATION.
+		#########################################################################################
 
 		#print("\nThis is the positon we're checking for: {}\n\n".format((nowrow,nowcoord)))
 		#checks new position
