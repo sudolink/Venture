@@ -6,7 +6,12 @@ import item
 
 #map descriptions
 map_desc = ["A cold and dark cavern","A deserted kitchen","A dusty bedroom with fresh linens on the bed",\
-		"A wine cellar, with spider webs everywhere","A living room in disarray","A messy garage"]
+		"A wine cellar, with spider webs everywhere","A living room in disarray","A messy garage",
+		"An attic, packed with old furniture","A bathroom, mirror broken on the wall","An underground tunnel",\
+		"A small antechamber","A grand underground cave","A dormitory","An armory","A hall with a natural pool in the middle",\
+		"A dungeon with 6 holding cells","A sunlit cave","A chapel chamber","A storage room","A room filled with webs... and spiders",\
+		"A treasury room","An underground passage","A water-filled cave","A wet cavern with a stream in the middle","A clearing in the forest with a hole in the ground",\
+		"A cabin in the woods","Inside the trunk of a car."]
 
 class maps():
 	'Maps have containers for items and beings. They can have effects on their occupants'
@@ -96,24 +101,22 @@ class gameField():
 			while notPlaced:
 				randomrow = random.choice([row for row in self.__dict__ if "row" in row])
 				randomcoord = random.choice([coord for coord in self.__dict__[randomrow]])
-				
 				#are map coordinates already in use?
 				if (randomrow,randomcoord) not in self.allmapcoords:
 					#check if new random coords are adjacent to any other
 					if self.checkIfAdjacent((randomrow,randomcoord)):
 						#then place new map at position
-						self.__dict__[randomrow][randomcoord] = "placed"
+						makeMap = maps(map_desc.pop(-1))
+						self.__dict__[randomrow][randomcoord] = "HERE"
 						self.allmapcoords.append((randomrow,randomcoord))
 						print("MAP PLACED @ {}-{}".format(randomrow,randomcoord))
 						notPlaced = False
-						pass
 					else:
 						#print("Coords not adjacent to any other map!")
 						continue
 				else:
 					#print("Map coordinates already in use!")
 					continue
-
 
 		print("\n*done appending maps*")
 
@@ -128,21 +131,20 @@ class gameField():
 		#THE DEFINITIONS BELOW ARE USED TO CHECK IN ALL DIRECTIONS FROM A GIVEN COORDINATE
 		#all that's done here is incrementing the row or coordinate number
 		#	checking row above
-		rowup = str(nowrow[0:-1]+str(int(nowrow[-1])+1))
-		coordup = str(nowcoord[0:-1]+str(int(nowcoord[-1])+1))
+		rowup = "{}{}".format(nowrow[0:3], int(nowrow[3:]) + 1)
+		coordup = "{}{}".format(nowcoord[0], int(nowcoord[1:]) + 1)
 		#	checking row below
-		rowdown	= str(nowrow[0:-1]+str(int(nowrow[-1])-1))
-		coorddown = str(nowcoord[0:-1]+str(int(nowcoord[-1])-1))
+		rowdown	= "{}{}".format(nowrow[0:3], int(nowrow[3:])-1)
+		coorddown = "{}{}".format(nowcoord[0], int(nowcoord[1:])-1)
 		#	checking same row coordinates left and right
-		coordleft = str(nowcoord[0:-1]+str(int(nowcoord[-1])-self.grid_size))  # +- gridsize is because different sized grids' adjacent
-		coordright = str(nowcoord[0:-1]+str(int(nowcoord[-1])+self.grid_size)) # coordinates have number differences of grid_size, because of the way I build in makeGrid
+		coordleft = "{}{}".format(nowcoord[0:1], int(nowcoord[1:])-self.grid_size)  # +- gridsize is because different sized grids' adjacent
+		coordright= "{}{}".format(nowcoord[0:1], int(nowcoord[1:])+self.grid_size) # coordinates have number differences of grid_size, because of the way I build in makeGrid
 		#	make a list of all the directions to check in
-		possibleChecks = [(rowup,coordup),(rowdown,coorddown),(nowrow,coordleft),(nowrow,coordright)]
+		possibleChecks = {"up":(rowup,coordup),"down":(rowdown,coorddown),"left":(nowrow,coordleft),"right":(nowrow,coordright)}
 
-		#print("\nThis is the positon we're checking for: {}\n\n".format((nowrow,nowcoord)))
 		for coordinates in self.allmapcoords:
 			#print("Current coords to check: {}\n".format(coordinates))
-			for possible in possibleChecks:
+			for direction,possible in possibleChecks.items():
 				if coordinates == possible:
 					return True
 					#print("adjacent! {} - {}".format(coordinates,possible))
@@ -202,7 +204,7 @@ class gameField():
 		elif switch == "slots":
 			#this one prints values - coordinate contents (where the maps are inserted)
 			for y in rows.values():
-				print([x for x in y.values()])
+				print("{} \t {}".format(y,[x for x in y.values()]))
 		else:
 			print("No display mode specified!")
 		print()
@@ -219,5 +221,5 @@ class gameField():
 		genesis = maps(map_desc.pop(-1))
 		randomrow = random.choice([row for row in self.__dict__ if "row" in row])
 		randomcoord = random.choice([coord for coord in self.__dict__[randomrow]])
-		self.__dict__[randomrow][randomcoord] = genesis
+		self.__dict__[randomrow][randomcoord] = "genesis"#genesis
 		self.allmapcoords.append((randomrow,randomcoord))
