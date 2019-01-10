@@ -104,14 +104,14 @@ class gameField():
 						#then place new map at position
 						self.__dict__[randomrow][randomcoord] = "placed"
 						self.allmapcoords.append((randomrow,randomcoord))
-						print("***************##### PLACED #####***********************{}-{}****************************".format(randomrow,randomcoord))
+						print("MAP PLACED @ {}-{}".format(randomrow,randomcoord))
 						notPlaced = False
 						pass
 					else:
-						print("Coords not adjacent to any other map!")
+						#print("Coords not adjacent to any other map!")
 						continue
 				else:
-					print("Map coordinates already in use!")
+					#print("Map coordinates already in use!")
 					continue
 
 
@@ -120,30 +120,26 @@ class gameField():
 
 	def checkIfAdjacent(self,location):
 		#print("\ncheckIfAdjacent checks if new random position is adjacent to any existing map\n")
-		print("\nThese are all used map coordinates:\n{}".format(self.allmapcoords))
+		#print("\nThese are all used map coordinates:\n{}".format(self.allmapcoords))
 		isAdjacent = False
 		nowrow = location[0]
 		nowcoord = location[1]
-		print("\t\tCHECK FOR THIS LOC: {}".format((nowrow,nowcoord)))
-			#checking row above
+
+		#THE DEFINITIONS BELOW ARE USED TO CHECK IN ALL DIRECTIONS FROM A GIVEN COORDINATE
+		#all that's done here is incrementing the row or coordinate number
+		#	checking row above
 		rowup = str(nowrow[0:-1]+str(int(nowrow[-1])+1))
 		coordup = str(nowcoord[0:-1]+str(int(nowcoord[-1])+1))
-			#checking row below
+		#	checking row below
 		rowdown	= str(nowrow[0:-1]+str(int(nowrow[-1])-1))
 		coorddown = str(nowcoord[0:-1]+str(int(nowcoord[-1])-1))
-			#checking same row coordinates left and right
-		coordleft = str(nowcoord[0:-1]+str(int(nowcoord[-1])-2))
-		coordright = str(nowcoord[0:-1]+str(int(nowcoord[-1])+2))
+		#	checking same row coordinates left and right
+		coordleft = str(nowcoord[0:-1]+str(int(nowcoord[-1])-self.grid_size))  # +- gridsize is because different sized grids' adjacent
+		coordright = str(nowcoord[0:-1]+str(int(nowcoord[-1])+self.grid_size)) # coordinates have number differences of grid_size, because of the way I build in makeGrid
+		#	make a list of all the directions to check in
 		possibleChecks = [(rowup,coordup),(rowdown,coorddown),(nowrow,coordleft),(nowrow,coordright)]
 
-		#########################################################################################
-		#PROBLEM HERE. DIFFERENT SIZED GRIDS CREATE DIFFERENT SIZED DIFFERENCES (HUH? NO SHIT?)
-		#SO THE ABOVE DEFINITIONS ARE USELESS, SAVE FOR 3X3 GRIDS.
-		#I'LL HAVE TO FETCH GRID NAMES AND COORDS MANUALLY, FOR EACH POSSIBLE COMBINATION.
-		#########################################################################################
-
 		#print("\nThis is the positon we're checking for: {}\n\n".format((nowrow,nowcoord)))
-		#checks new position
 		for coordinates in self.allmapcoords:
 			#print("Current coords to check: {}\n".format(coordinates))
 			for possible in possibleChecks:
@@ -158,14 +154,14 @@ class gameField():
 
 	def makeGrid(self):
 		print("Map slots to create: {}".format(self.numberOfMaps))
-		grid_size = None #(number of lists and slots, times to append additional slots)
+		self.grid_size = None #(number of lists and slots, times to append additional slots)
 		leftover = None
 		#determine grid parameters here
 		for num in range(self.numberOfMaps,0,-1):#from number of slots, iterate down to zero
 			if num * num <= self.numberOfMaps:
-				grid_size = num
+				self.grid_size = num
 				leftover = self.numberOfMaps - (num*num)
-				print("Grid size:{}x{} Leftover is: {}".format(grid_size,grid_size,leftover))
+				print("Grid size:{}x{} Leftover is: {}".format(num,num,leftover))
 
 				#highest num whose (num*num) result fits into self.numberOfMaps
 				#break, because we've found the best candidate
@@ -173,7 +169,7 @@ class gameField():
 
 		##GRID BUILDING BELOW
 		#making the object attributes
-		for i in range(grid_size):
+		for i in range(self.grid_size):
 			setattr(self,"row{}".format(i),{})
 
 		#some quality of life improvements, definitions for easier use and testing purposes below
@@ -188,7 +184,7 @@ class gameField():
 
 		row = 0 #start on row 0
 		for coordinate in coordinate_names:
-			dictofrows["row{}".format(row)][coordinate] = "š"
+			dictofrows["row{}".format(row)][coordinate] = "0"
 			row +=1 #increment to next row
 			if row > len(list_of_rows)-1: #when row number > number of object's row{x} attributes, reset to 0
 				row = 0
