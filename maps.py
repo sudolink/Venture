@@ -74,25 +74,49 @@ class gameField():
 		##	gamefield lists
 		######
 		self.makeGrid() #generates quadrant lists
-			#print()
-			#self.showGrid() #show gameMap
 
+		self.showGrid() #show gameMap
 
-		#call generator function here
+		#generate maps here
 		self.generateMap()
-
-
+		self.showGrid()
+	
 	def generateMap(self):
-		justPlaced = self.genesis_location
-
 		#make genesis here, it randomly appends itself
 		self.genesisMap("placeholder")
+		justPlaced = self.genesis_location
+		print("\nGenesis location: {}".format(justPlaced))
+
+		#append other maps here.
+		self.numberOfMaps = int(self.numberOfMaps / 2) #to allow for empty slots in gameField.
+		print("\nMaps to append: {}".format(self.numberOfMaps))
+
+		#take justPlaced and increment new position adjacent to it
+		notPlaced = True
+		while notPlaced:
+			randomrow = random.choice([row for row in self.__dict__ if "row" in row])
+			randomcoord = random.choice([coord for coord in self.__dict__[randomrow]])
+			#if previous map is adjacent to current random position
+				#then place new map at position
+			#else
+				#continue picking position until above is true
+			self.checkIfAdjacent(justPlaced,(randomrow,randomcoord))
+			break
 
 
+		print("\n*done appending maps*")
+
+	def checkIfAdjacent(self,previous,now):
+		prerow = previous[0]
+		precoord = previous[1]
+		nowrow = now[0]
+		nowcoord = now[1]
+
+		print("\nFunction checks previous position of :{}\t against new position of: {}".format(previous,(nowrow,nowcoord)))
 		
 
 	def makeGrid(self):
-		print("{} map slots to create".format(self.numberOfMaps))
+		print("Map slots to create: {}".format(self.numberOfMaps))
 		grid_size = None #(number of lists and slots, times to append additional slots)
 		leftover = None
 		#determine grid parameters here
@@ -100,7 +124,7 @@ class gameField():
 			if num * num <= self.numberOfMaps:
 				grid_size = num
 				leftover = self.numberOfMaps - (num*num)
-				print("\nGrid size is:{}x{} Leftover is: {}".format(grid_size,grid_size,leftover))
+				print("Grid size:{}x{} Leftover is: {}".format(grid_size,grid_size,leftover))
 
 				#highest num whose (num*num) result fits into self.numberOfMaps
 				#break, because we've found the best candidate
@@ -115,9 +139,9 @@ class gameField():
 		list_of_rows = [row for row in dir(self) if "row" in row]
 		dictofrows= {k:v for k,v in self.__dict__.items() if "row" in k}
 
-		print(list_of_rows,"\n",dictofrows)
+		#print(list_of_rows,"\n",dictofrows)
 		
-		    ###full grid here
+		    ###Gridmaking here
 		coordinate_names = ["c{}".format(coordinate) for coordinate in range(self.numberOfMaps)] #list of all coordinates for this gamefield c0-c99
 		#dictofrows["row0"]["c0"] = "placeholder"
 
@@ -127,16 +151,22 @@ class gameField():
 			row +=1 #increment to next row
 			if row > len(list_of_rows)-1: #when row number > number of object's row{x} attributes, reset to 0
 				row = 0
-	
-		self.showGrid()
 
 
 
 	def showGrid(self):
 		print("\nTESTING! This will be the game map")
 		rows = {k:v for k,v in self.__dict__.items() if "row" in k}
-		for y in rows.values():
-			print([x for x in y.values()])
+		
+		#this one prints keys - coordinate names
+		for v in rows.values():
+			print([x for x in v])
+
+		#this one prints values - coordinate contents (where the maps are inserted)
+		#for y in rows.values():
+		#	print([x for x in y.values()])
+		#print()
+
 
 		#SET UP AS IT IS FOR TESTING PURPOSES
 		#YOU'LL HAVE TO MODIFY THIS TO ACCESS THE MAP OBJECT'S NAME?
@@ -149,7 +179,6 @@ class gameField():
 		genesis = maps(map_desc.pop())
 		randomrow = random.choice([row for row in self.__dict__ if "row" in row])
 		randomcoord = random.choice([coord for coord in self.__dict__[randomrow]])
-		print("\nRandom row: {}\tRandom coord: {}".format(randomrow,randomcoord))
 		maps(map_desc.pop())
 		self.__dict__[randomrow][randomcoord] = genesis
-		self.showGrid()
+		self.genesis_location = (randomrow,randomcoord)
