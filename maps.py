@@ -68,52 +68,88 @@ class gameField():
 		self.player1 = None
 		self.currentMap = None
 		self.numberOfMaps = random.randint(5,25)
-		self.genesis_location = tuple()
-			#print(self.genesis_location)
+		self.allmapcoords = []
 		########################################
 		##	gamefield lists
 		######
 		self.makeGrid() #generates quadrant lists
 
-		self.showGrid() #show gameMap
+		self.showGrid("coords") #show gameMap
 
 		#generate maps here
 		self.generateMap()
-		self.showGrid()
+		self.showGrid("slots")
 	
 	def generateMap(self):
-		#make genesis here, it randomly appends itself
+		#make genesis here, it inserts itself randomly into the map matrix
 		self.genesisMap("placeholder")
-		justPlaced = self.genesis_location
-		print("\nGenesis location: {}".format(justPlaced))
+		print("\nGenesis location: {}".format(self.allmapcoords[0]))
 
-		#append other maps here.
+		#append other maps below
 		self.numberOfMaps = int(self.numberOfMaps / 2) #to allow for empty slots in gameField.
 		print("\nMaps to append: {}".format(self.numberOfMaps))
 
-		#take justPlaced and increment new position adjacent to it
-		notPlaced = True
-		while notPlaced:
-			randomrow = random.choice([row for row in self.__dict__ if "row" in row])
-			randomcoord = random.choice([coord for coord in self.__dict__[randomrow]])
-			#if previous map is adjacent to current random position
-				#then place new map at position
-			#else
-				#continue picking position until above is true
-			self.checkIfAdjacent(justPlaced,(randomrow,randomcoord))
-			break
+		#run map_placement until numberofmaps is depleted
+		for map_placement in range(self.numberOfMaps):
+			#until map is placed, keep trying
+			notPlaced = True
+			while notPlaced:
+				#RANDOM IS BRUTE FORCING
+				#NEED TO MAKE A POPPABLE LIST FROM WHICH IT WILL RANDOM PICK
+				randomrow = random.choice([row for row in self.__dict__ if "row" in row])
+				randomcoord = random.choice([coord for coord in self.__dict__[randomrow]])
+				
+				#are map coordinates already in use?
+				if (randomrow,randomcoord) not in self.allmapcoords:
+					#check if new random coords are adjacent to any other
+					if self.checkIfAdjacent((randomrow,randomcoord)):
+						#then place new map at position
+						self.__dict__[randomrow][randomcoord] = "placed"
+						self.allmapcoords.append((randomrow,randomcoord))
+						print("***************##### PLACED #####***********************{}-{}****************************".format(randomrow,randomcoord))
+						notPlaced = False
+						pass
+					else:
+						print("Coords not adjacent to any other map!")
+						continue
+				else:
+					print("Map coordinates already in use!")
+					continue
 
 
 		print("\n*done appending maps*")
 
-	def checkIfAdjacent(self,previous,now):
-		prerow = previous[0]
-		precoord = previous[1]
-		nowrow = now[0]
-		nowcoord = now[1]
 
-		print("\nFunction checks previous position of :{}\t against new position of: {}".format(previous,(nowrow,nowcoord)))
-		
+	def checkIfAdjacent(self,location):
+		#print("\ncheckIfAdjacent checks if new random position is adjacent to any existing map\n")
+		#print("\nThese are all used map coordinates:\n{}".format(self.allmapcoords))
+		isAdjacent = False
+		nowrow = location[0]
+		nowcoord = location[1]
+			#checking row above
+		rowup = str(nowrow[0:-1]+str(int(nowrow[-1])+1))
+		coordup = str(nowcoord[0:-1]+str(int(nowcoord[-1])+1))
+			#checking row below
+		rowdown	= str(nowrow[0:-1]+str(int(nowrow[-1])-1))
+		coorddown = str(nowcoord[0:-1]+str(int(nowcoord[-1])-1))
+			#checking same row coordinates left and right
+		coordleft = str(nowcoord[0:-1]+str(int(nowcoord[-1])-2))
+		coordright = str(nowcoord[0:-1]+str(int(nowcoord[-1])+2))
+		possibleChecks = [(rowup,coordup),(rowdown,coorddown),(nowrow,coordleft),(nowrow,coordright)]
+
+		#print("\nThis is the positon we're checking for: {}\n\n".format((nowrow,nowcoord)))
+		#checks new position
+		for coordinates in self.allmapcoords:
+			#print("Current coords to check: {}\n".format(coordinates))
+			for possible in possibleChecks:
+				if coordinates == possible:
+					return True
+					#print("adjacent! {} - {}".format(coordinates,possible))
+				else:
+					isAdjacent = False
+					#print("not adjacent! {} - {}".format(coordinates,possible))
+		return isAdjacent
+
 
 	def makeGrid(self):
 		print("Map slots to create: {}".format(self.numberOfMaps))
@@ -147,25 +183,28 @@ class gameField():
 
 		row = 0 #start on row 0
 		for coordinate in coordinate_names:
-			dictofrows["row{}".format(row)][coordinate] = "-"
+			dictofrows["row{}".format(row)][coordinate] = "š"
 			row +=1 #increment to next row
 			if row > len(list_of_rows)-1: #when row number > number of object's row{x} attributes, reset to 0
 				row = 0
 
 
 
-	def showGrid(self):
+	def showGrid(self,switch=None):
 		print("\nTESTING! This will be the game map")
 		rows = {k:v for k,v in self.__dict__.items() if "row" in k}
 		
-		#this one prints keys - coordinate names
-		for v in rows.values():
-			print([x for x in v])
-
-		#this one prints values - coordinate contents (where the maps are inserted)
-		#for y in rows.values():
-		#	print([x for x in y.values()])
-		#print()
+		if switch == "coords":
+			#this one prints keys - coordinate names
+			for v in rows.values():
+				print([x for x in v])
+		elif switch == "slots":
+			#this one prints values - coordinate contents (where the maps are inserted)
+			for y in rows.values():
+				print([x for x in y.values()])
+		else:
+			print("No display mode specified!")
+		print()
 
 
 		#SET UP AS IT IS FOR TESTING PURPOSES
@@ -176,9 +215,8 @@ class gameField():
 
 
 	def genesisMap(self,player1):
-		genesis = maps(map_desc.pop())
+		genesis = maps(map_desc.pop(-1))
 		randomrow = random.choice([row for row in self.__dict__ if "row" in row])
 		randomcoord = random.choice([coord for coord in self.__dict__[randomrow]])
-		maps(map_desc.pop())
 		self.__dict__[randomrow][randomcoord] = genesis
-		self.genesis_location = (randomrow,randomcoord)
+		self.allmapcoords.append((randomrow,randomcoord))
