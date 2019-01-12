@@ -16,27 +16,36 @@ map_desc = ["A cold and dark cavern","A deserted kitchen","A dusty bedroom with 
 class maps():
 	'Maps have containers for items and beings. They can have effects on their occupants'
 
-	def __init__(self, description,coords):
+	def __init__(self,description,location,id_num):
 		self.description = description
+		self.id_num = id_num
 		self.items = {} #items in area
-		self.occupants = []	#creature objects residing in map
-		self.coords = coords
+		self.occupants = {}	#creature objects residing in map
+		self.location = location
 		self.visited = False
 		self.hasPlayer = False
-		self.exits = []
+		self.adjacent_exits = {}
 
 	def acceptPlayer(self,player):
-		self.occupants.append(player)
+		self.occupants[player.name] = player
 		self.hasPlayer = True
 		if self.visited == False:
 			self.visited = True
-		print("{} enters.".format(self.occupants[0].name))####(self.occupants[0].name) because only occupant
+		print("{} enters.".format(self.occupants[player.name].name))####(self.occupants[0].name) because only occupant
 		self.describeYourself()
 
-	def givePlayer(self):
-		#send player to other map
-		#remove player from occupants list
-		#set hasplayer to false
+	def giveOccupant(self,playername,direction):
+		print("came to map object function")
+		if direction in self.adjacent_exits: #check whether move is valid
+			try:
+				self.occupants[playername] #check if present
+			except:
+				pass
+			else:
+				del self.occupants[playername]
+				self.hasPlayer = False # ONLY if "playername" not in self.occupants
+				return self.adjacent_exits[direction]
+				#to gamefield
 		pass
 
 	def takeItems(self,items):
@@ -65,7 +74,7 @@ class maps():
 	def yieldItem(self,item):
 		if self.checkForItem(item):
 			if self.items[item].takeable == True: #if item has takeable property
-				return self.items.pop(item)
+				return self.items.pop(item) #IF TWO ITEMS OF SAME NAME, IT WILL POP BOTH
 			else:
 				print("Can't take {}.".format(item))
 				return
@@ -77,12 +86,13 @@ class maps():
 ######################################################################################################
 
 class gameField():
-	def __init__(self):
-		self.player1 = None
-		self.currentMap = None
+	def __init__(self,player1):
+		self.player1 = player1
+		self.currentMap = None #contains the coordinates of the map not the object itself
 		self.numberOfMaps = random.randint(5,25)
 		self.allmapcoords = []
 		self.allmaps = []
+		self.adjacentMaps = {}
 		########################################
 		##	gamefield lists
 		######
@@ -95,17 +105,42 @@ class gameField():
 		self.showGrid("slots")
 
 		#testing if maps got their items
-		print("______________________________________")
-		print("\nDid the all maps get items properly?\n")
-		for x in self.allmaps:
-			print("{}\n{}".format(x.description,[x for x in x.items.keys()]))
-			print("")
-		print("______________________________________")
+		#print("______________________________________")
+		#print("\nDid the all maps get items properly?\n")
+		#for x in self.allmaps:
+		#	print("{}\n{}".format(x.description,[x for x in x.items.keys()]))
+		#	print("")
+		#print("______________________________________")
 
+
+		#lastly, give player object to genesis to start the game
+		self.__dict__[self.currentMap[0]][self.currentMap[1]].acceptPlayer(self.player1)
+
+	def fetchMapObject(self,coords=None):#default is to fetch the current map object
+		if coords == None:
+			return self.__dict__[self.currentMap[0]][self.currentMap[1]]
+		else:
+			return self.__dict__[self.coords[0]][self.coords[1]]
+
+
+	def attemptTravel(self,area,where):
+                if where.lower() in area.adjacent_exits:
+                        travelto = area.giveOccupant(self.player1.name,where)
+                        x = travelto[0]
+                        y = travelto[1]
+                        self.currentMap = self.__dict__[x][y].location
+                        self.__dict__[x][y].acceptPlayer(self.player1)
+                else:
+                	print("There is no exit to the {}!".format(where.capitalize()))
 
 	def fillMap(self,map_instance):
 		map_instance.takeItems(item.itemPopulator3000())
 		#populate with creatures
+
+	def giveMapsExits(self):
+		for area in self.allmaps:
+			area.adjacent_exits = self.checkForAdjacent(area.location,"find_exits")
+			#print(area.adjacent_exits)
 	
 	def generateMap(self):
 		#make genesis here, it inserts itself randomly into the map matrix
@@ -117,25 +152,26 @@ class gameField():
 		#print("\nMaps to append: {}".format(self.numberOfMaps))
 
 		#run map_placement until numberofmaps is depleted
-		for map_placement in range(self.numberOfMaps):
+		for map_id in range(1,self.numberOfMaps+1): #genesis_id is manually set at 0
 			#until map is placed, keep trying
 			notPlaced = True
 			while notPlaced:
 				#pick a random position of row and coord in that row
 				randomrow = random.choice([row for row in self.__dict__ if "row" in row])
 				randomcoord = random.choice([coord for coord in self.__dict__[randomrow]])
+				new_map_location = (randomrow,randomcoord)
 				#are map coordinates already in use?
-				if (randomrow,randomcoord) not in self.allmapcoords:
+				if new_map_location not in self.allmapcoords:
 					#check if new random coords are adjacent to any already placed map
-					if self.checkIfAdjacent((randomrow,randomcoord)):
+					if self.checkForAdjacent(new_map_location,"slotfind"): 
 							#then make map
-						makeMap = maps(map_desc.pop(-1),(randomrow,randomcoord))
+						makeMap = maps(map_desc.pop(-1),new_map_location,map_id)
 							#init maps here
 						self.fillMap(makeMap)
 							#place map in matrix
 						self.__dict__[randomrow][randomcoord] = makeMap
 							#put the newly used coords in the list
-						self.allmapcoords.append((randomrow,randomcoord))
+						self.allmapcoords.append(new_map_location)
 							#put the map in a list
 						self.allmaps.append(makeMap)
 						#print("MAP PLACED @ {}-{}".format(randomrow,randomcoord))
@@ -148,10 +184,11 @@ class gameField():
 					continue
 
 		#print("\n*done appending maps*")
+		self.giveMapsExits()
 
 
-	def checkIfAdjacent(self,location):
-		#print("\ncheckIfAdjacent checks if new random position is adjacent to any existing map\n")
+	def checkForAdjacent(self,location,mode="slotfind"):
+		#print("\ncheckForAdjacent checks if new random position is adjacent to any existing map\n")
 		#print("\nThese are all used map coordinates:\n{}".format(self.allmapcoords))
 		isAdjacent = False
 		nowrow = location[0]
@@ -162,25 +199,54 @@ class gameField():
 		#	checking row above
 		rowup = "{}{}".format(nowrow[0:3], int(nowrow[3:]) + 1)
 		coordup = "{}{}".format(nowcoord[0], int(nowcoord[1:]) + 1)
+		north = (rowup,coordup)
+		
 		#	checking row below
 		rowdown	= "{}{}".format(nowrow[0:3], int(nowrow[3:])-1)
 		coorddown = "{}{}".format(nowcoord[0], int(nowcoord[1:])-1)
+		south = (rowdown,coorddown)
+		
 		#	checking same row coordinates left and right
 		coordleft = "{}{}".format(nowcoord[0:1], int(nowcoord[1:])-self.grid_size)  # +- gridsize is because different sized grids' adjacent
 		coordright= "{}{}".format(nowcoord[0:1], int(nowcoord[1:])+self.grid_size) # coordinates have number differences of grid_size, because of the way I build in makeGrid
+		east = (nowrow,coordright)
+		west = (nowrow,coordleft)
+		
 		#	make a list of all the directions to check in
-		possibleChecks = {"up":(rowup,coordup),"down":(rowdown,coorddown),"left":(nowrow,coordleft),"right":(nowrow,coordright)}
+		possibleChecks = {"north":north,"south":south,"east":east,"west":west}
 
-		for coordinates in self.allmapcoords:
-			#print("Current coords to check: {}\n".format(coordinates))
-			for direction,possible in possibleChecks.items():
-				if coordinates == possible:
-					return True
-					#print("adjacent! {} - {}".format(coordinates,possible))
+		if mode == "slotfind":
+			for coordinates in self.allmapcoords:
+				#print("Current coords to check: {}\n".format(coordinates))
+				for direction, coord_tuple in possibleChecks.items():
+					if coordinates == coord_tuple:
+						return True
+						#print("adjacent! {} - {}".format(coordinates,possible))
+					else:
+						isAdjacent = False
+						#print("not adjacent! {} - {}".format(coordinates,possible))
+			
+			return isAdjacent
+	
+		elif mode == "find_exits":
+			map_loc = (nowrow,nowcoord)
+			map_adjacents = {}
+			for direction, coord_tuple in possibleChecks.items():
+				try:
+					self.__dict__[coord_tuple[0]][coord_tuple[1]]
+				except:
+					#print("{} is not a map coordinate!".format((coord_tuple[0],coord_tuple[1])))
+					continue
 				else:
-					isAdjacent = False
-					#print("not adjacent! {} - {}".format(coordinates,possible))
-		return isAdjacent
+					if type(self.__dict__[coord_tuple[0]][coord_tuple[1]]) == maps :
+						map_adjacents[direction] = coord_tuple
+					else:
+						#print("No map object @ {}".format((coord_tuple[0],coord_tuple[1])))
+						pass
+			return map_adjacents
+		else:
+			print("*** checkForAdjacent should NOT come here.")
+			return False
 
 
 	def makeGrid(self):
@@ -220,6 +286,7 @@ class gameField():
 
 	def showGrid(self,switch=None):
 		print("\nTESTING! This will be the game map")
+		print("Currently shows each map's ID")
 		rows = {k:v for k,v in self.__dict__.items() if "row" in k}
 		
 		if switch == "coords":
@@ -230,7 +297,7 @@ class gameField():
 			#this one prints values - coordinate contents (where the maps are inserted)
 			for y in rows.values():
 				print("\n") #breaks after each row  # @'s are maps, ' 's are empty slots
-				for room in ["x" if type(x) == maps else " " for x in y.values()]:
+				for room in [x.id_num if type(x) == maps else " " for x in y.values()]:
 					print("{}  ".format(room),end="")
 				#print("{} \t {}".format(y,[x for x in y.values()]))
 			print("\n\n")
@@ -242,8 +309,8 @@ class gameField():
 		#	print("{}\t{}".format(y,x))
 
 		#SET UP AS IT IS FOR TESTING PURPOSES
-		#YOU'LL HAVE TO MODIFY THIS TO ACCESS THE MAP OBJECT'S NAME?
-		#ONLY SHOW WHAT HAS BEEN EXPLORED?
+		#Only show what has been explored, i.e.
+		#access the map's .visited boolean
 
 
 
@@ -252,10 +319,12 @@ class gameField():
 			#pick a completely random position for the genesis map
 		randomrow = random.choice([row for row in self.__dict__ if "row" in row])
 		randomcoord = random.choice([coord for coord in self.__dict__[randomrow]])
+		genesis_location = (randomrow,randomcoord)
 			#take a random map description, and remove it from list; tell the map where it's located
-		genesis = maps(map_desc.pop(-1),(randomrow,randomcoord))
+		genesis = maps(map_desc.pop(-1),genesis_location,0)
 			#if "genesis" is passed to itempopulator3k then at least one food item will be put in map
 		genesis.takeItems(item.itemPopulator3000("Genesis"))
 		self.__dict__[randomrow][randomcoord] = genesis
-		self.allmapcoords.append((randomrow,randomcoord))
+		self.allmapcoords.append(genesis_location)
 		self.allmaps.append(genesis)
+		self.currentMap = genesis_location

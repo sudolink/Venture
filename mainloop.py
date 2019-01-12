@@ -23,10 +23,9 @@ player1 = None
 #inputHandler.clearScreen()
 
 #make the starting area
-gField = maps.gameField()
 player1 = player.player()
-quit()
+gField = maps.gameField(player1)
 
 #main loop
 while True:
-	inputHandler.pinp(player1,gField.currentMap)
+	inputHandler.pinp(player1,gField)

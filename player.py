@@ -22,7 +22,7 @@ class player():
             print("In your inventory:\n")
             self.inventory[item.capitalize()].giveDescription()
         else:
-            print("\nNo '{}' around.".format(item.capitalize()))        
+            print("\nNo '{}' around.".format(item.capitalize()))
 
     def take(self,area,item):
         try:

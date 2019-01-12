@@ -6,7 +6,7 @@ clearScreen = lambda: os.system('cls')
 
 #command list
 simple_command_names = ["help","look","quit","inventory"]
-complex_command_names = ["inspect","take","attack","take","drop"]
+complex_command_names = ["inspect","take","attack","take","drop","go"]
 
 def quitgame():
 	dontquit = True
@@ -33,16 +33,14 @@ def cmndlst():
     print("\n\t## inspect - take - attack - take - drop")
     print("\n\t##+++++++++++++++++++++++++++++++++++++++++++++++\n\n\n")
 #player input handling function
-def pinp(player1,area):
-    ######
-    ######
-    ###### FIGURE OUT HOW TO MAKE COMMAND DICT PROGRAMATICALLY
-    ###### NOT. BY. HAND.
-    ######
-    ######
-    command_dict = {"look":area.describeYourself,"inspect":player1.inspect,"take":player1.take,\
-        "drop":player1.drop,"help":cmndlst,"quit":quitgame,"inventory":player1.showInventory}
+def pinp(player1,gfield):
+  
+    area = gfield.fetchMapObject()
     
+    command_dict = {"go":gfield.attemptTravel,"look":area.describeYourself,"inspect":player1.inspect,"take":player1.take,\
+        "drop":player1.drop,"help":cmndlst,"quit":quitgame,"inventory":player1.showInventory}
+
+
     inp = str(input("\n> ")).lower()
     #clearScreen()
     inp = validCommand(inp)
