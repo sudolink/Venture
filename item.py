@@ -7,8 +7,9 @@ inrange = lambda bottom,top: random.randint(bottom,top)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class item(object):
-	def __init__(self,name,undetermined_dict_of_attributes):
+	def __init__(self,name,undetermined_dict_of_attributes,id_num):
 		self.name = name
+		self.id_num = id_num
 		self.setAttributes(undetermined_dict_of_attributes)
 		#list of attributes not to be displayed when giveDescription is called
 		self.hiddenAttributes = ("name","description","takeable","hiddenAttributes",\
@@ -33,15 +34,15 @@ class item(object):
 
 class food(item):
 
-	def __init__(self,name,undetermined_dict_of_attributes):
-		super(food, self).__init__(name,undetermined_dict_of_attributes)
+	def __init__(self,name,undetermined_dict_of_attributes,id_num):
+		super(food, self).__init__(name,undetermined_dict_of_attributes,id_num)
 		self.takeable = True
 		self.unique = False
 
 class weapon(item):
 
-	def __init__(self,name,undetermined_dict_of_attributes):
-		super(weapon, self).__init__(name,undetermined_dict_of_attributes)
+	def __init__(self,name,undetermined_dict_of_attributes,id_num):
+		super(weapon, self).__init__(name,undetermined_dict_of_attributes,id_num)
 		self.unique = True
 		self.takeable = True
 
@@ -97,17 +98,20 @@ def itemPopulator3000(area=None):
 	weapons_in_map = 0  #of same-type items in map
 	max_food_in_map = 2
 	food_in_map = 0
+	id_num = 0
 
 	for name in item_names: #iterate through item names
 		chance = 66
 		if inrange(0,100) < chance: #chance is chance out of 100
 			if checkItemExists(name) == "infoods": #self explanatory
 				if food_in_map < max_food_in_map: #if more food generated than allowed, do nothing
-					generated_items.append(food(name,foods[name]))#make item from item attribute dict
+					generated_items.append(food(name,foods[name],id_num))#make item from item attribute dict
+					id_num += 1
 					food_in_map += 1
 			elif checkItemExists(name) == "inweapons":
 				if weapons_in_map < max_weapons_in_map:
-					generated_items.append(weapon(name,weapons[name]))
+					generated_items.append(weapon(name,weapons[name],id_num))
+					id_num += 1
 					weapons_in_map += 1
 				pass
 			else:
@@ -115,6 +119,7 @@ def itemPopulator3000(area=None):
 
 	if not generated_items and area=="Genesis": #if no items are generated, generate a food item if it's the genesis map.
 		tmp = random.choice(food_list)
-		generated_items.append(food(tmp,foods[tmp]))
+		generated_items.append(food(tmp,foods[tmp],id_num))
+		id_num += 1
 
 	return generated_items

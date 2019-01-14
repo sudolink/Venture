@@ -57,7 +57,9 @@ class maps():
 
 	def describeYourself(self):
 		print("\n{}".format(self.description))
+		print("You can go {} from here.".format(list(self.adjacent_exits.keys())))
 		if self.items:
+			#print(self.items)
 			print("\nYou see:")
 			test = " // "
 			for item in self.items.keys():

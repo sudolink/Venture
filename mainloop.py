@@ -14,7 +14,6 @@ print("\n\t~~~###*** Welcome to VENTURE!***###~~~\n\n")
 
 #Placeholders for objects when travelling occurs
 visited_areas = []
-area = None
 player1 = None
 
 #TESTING PHASE
