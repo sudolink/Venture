@@ -31,11 +31,10 @@ class maps():
 		self.hasPlayer = True
 		if self.visited == False:
 			self.visited = True
-		print("{} enters.".format(self.occupants[player.name].name))####(self.occupants[0].name) because only occupant
+		print("{} enters:".format(self.occupants[player.name].name))####(self.occupants[0].name) because only occupant
 		self.describeYourself()
 
 	def giveOccupant(self,playername,direction):
-		print("came to map object function")
 		if direction in self.adjacent_exits: #check whether move is valid
 			try:
 				self.occupants[playername] #check if present
@@ -51,19 +50,19 @@ class maps():
 	def takeItems(self,items):
 		if type(items) == list:
 			for item in items:
-				self.items[item.name] = item
+				self.items[item.name_id] = item
 		else:
-			self.items[items.name] = items
+			self.items[items.name_id] = items
 
 	def describeYourself(self):
-		print("\n{}".format(self.description))
-		print("You can go {} from here.".format(list(self.adjacent_exits.keys())))
+		print("{}".format(self.description))
+		print("\nExits: {}".format(list(self.adjacent_exits.keys())))
 		if self.items:
 			#print(self.items)
 			print("\nYou see:")
 			test = " // "
 			for item in self.items.keys():
-				test += (item+" // ")
+				test += (item[0]+" // ")
 			print("{}".format("~"*(len(test))))
 			print(test)
 			print("{}".format("~"*(len(test))))
@@ -71,18 +70,21 @@ class maps():
 			print("\nThere's nothing in this area.")
 
 	def checkForItem(self,item):
-		return item.capitalize() in self.items.keys() #does item exist - true/false
+		for it in self.items:
+			if it[0] == item.capitalize():
+				return it
 
-	def yieldItem(self,item):
-		if self.checkForItem(item):
-			if self.items[item].takeable == True: #if item has takeable property
-				return self.items.pop(item) #IF TWO ITEMS OF SAME NAME, IT WILL POP BOTH
-			else:
-				print("Can't take {}.".format(item))
-				return
+		return False
+
+
+
+	def yieldItem(self,item_tuple):
+		give_item = self.items[item_tuple]
+		if give_item.takeable:
+			del self.items[item_tuple]
+			return give_item
 		else:
-			print("No '{}' in the area".format(item))
-
+			print("You can't take that!")
 ######################################################################################################
 ######################################################################################################
 ######################################################################################################
@@ -95,6 +97,7 @@ class gameField():
 		self.allmapcoords = []
 		self.allmaps = []
 		self.adjacentMaps = {}
+		self.num_items_generated = 0
 		########################################
 		##	gamefield lists
 		######
@@ -136,7 +139,9 @@ class gameField():
                 	print("There is no exit to the {}!".format(where.capitalize()))
 
 	def fillMap(self,map_instance):
-		map_instance.takeItems(item.itemPopulator3000())
+		new_items = item.itemPopulator3000(self.num_items_generated)
+		self.num_items_generated += len(new_items)
+		map_instance.takeItems(new_items)
 		#populate with creatures
 
 	def giveMapsExits(self):
@@ -325,7 +330,9 @@ class gameField():
 			#take a random map description, and remove it from list; tell the map where it's located
 		genesis = maps(map_desc.pop(-1),genesis_location,0)
 			#if "genesis" is passed to itempopulator3k then at least one food item will be put in map
-		genesis.takeItems(item.itemPopulator3000("Genesis"))
+		generated_for_genesis = item.itemPopulator3000(self.num_items_generated,"Genesis")
+		self.num_items_generated += len(generated_for_genesis)
+		genesis.takeItems(generated_for_genesis)
 		self.__dict__[randomrow][randomcoord] = genesis
 		self.allmapcoords.append(genesis_location)
 		self.allmaps.append(genesis)

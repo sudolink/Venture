@@ -8,12 +8,12 @@ inrange = lambda bottom,top: random.randint(bottom,top)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class item(object):
 	def __init__(self,name,undetermined_dict_of_attributes,id_num):
-		self.name = name
-		self.id_num = id_num
+		self.name_id = (name,id_num)
+		self.name = self.name_id[0]
 		self.setAttributes(undetermined_dict_of_attributes)
 		#list of attributes not to be displayed when giveDescription is called
 		self.hiddenAttributes = ("name","description","takeable","hiddenAttributes",\
-			"unique")
+			"unique","name_id")
 
 	def setAttributes(self,undetermined_dict_of_attributes):
 		for (attribute,value) in undetermined_dict_of_attributes.items():
@@ -91,17 +91,17 @@ def checkItemExists(name):
 		print("{} isn't in any item lists!".format(name))
 		return False
 
-def itemPopulator3000(area=None):
+def itemPopulator3000(id_num,area=None):
 	item_names = [name for name in food_list + weapon_list]
 	generated_items = []
 	max_weapons_in_map = 1 #use this for controlling max numbers
 	weapons_in_map = 0  #of same-type items in map
 	max_food_in_map = 2
 	food_in_map = 0
-	id_num = 0
+	id_num = id_num
 
 	for name in item_names: #iterate through item names
-		chance = 66
+		chance = 33
 		if inrange(0,100) < chance: #chance is chance out of 100
 			if checkItemExists(name) == "infoods": #self explanatory
 				if food_in_map < max_food_in_map: #if more food generated than allowed, do nothing

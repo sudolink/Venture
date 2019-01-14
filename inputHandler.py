@@ -6,7 +6,7 @@ clearScreen = lambda: os.system('cls')
 
 #command list
 simple_command_names = ["help","look","quit","inventory"]
-complex_command_names = ["inspect","take","attack","take","drop","go"]
+complex_command_names = ["inspect","attack","go","take","drop"]
 
 def quitgame():
 	dontquit = True
@@ -42,7 +42,7 @@ def pinp(player1,gfield):
 
 
     inp = str(input("\n> ")).lower()
-    #clearScreen()
+    clearScreen()
     inp = validCommand(inp)
     if inp:
         #check if simple

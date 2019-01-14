@@ -15,45 +15,52 @@ class player():
         #use map's item contain checker
         #use player's item contain checker
         #else no 'item' around
-        if area.checkForItem(item):
-            print("In area:\n")
-            area.items[item.capitalize()].giveDescription()
-        elif self.checkForItem(item):
-            print("In your inventory:\n")
-            self.inventory[item.capitalize()].giveDescription()
+        inAreaTuple = area.checkForItem(item)
+        inInventoryTuple = self.checkForItem(item)
+
+        if inAreaTuple:
+            area.items[inAreaTuple].giveDescription()
+        elif inInventoryTuple:
+            self.inventory[inInventoryTuple].giveDescription()
         else:
-            print("\nNo '{}' around.".format(item.capitalize()))
+            print("No {} around.".format(item))
+
+        del inAreaTuple,inInventoryTuple
 
     def take(self,area,item):
-        try:
-            tk = area.yieldItem(item.capitalize())
-        except:
-    	    print("Can't take that.")
+        item_tuple = area.checkForItem(item)
+        if item_tuple:
+            tk = area.yieldItem(item_tuple)
+            self.inventory[item_tuple] = tk
+            print("You put '{}' in your inventory.".format(tk.name))
         else:
-            if tk:
-                self.inventory[tk.name]=tk
-                print("'{}'' put in inventory".format(tk.name))
-            del tk
+            print("No '{}' around to take.".format(item))
+        del item_tuple,tk
 
     def drop(self,area,item):
-    	if self.checkForItem(item):
-    	    drp = self.inventory.pop(item.capitalize())
-    	    area.items[drp.name] = drp
-    	    print("'{}' dropped from inventory".format(drp.name))
-    	    del drp
-    	else:
-    	    print("You don't have that item!")
+        item_tuple = self.checkForItem(item)
+        if item_tuple:
+            tk = self.inventory[item_tuple]
+            del self.inventory[item_tuple]
+            print("You drop '{}' from your inventory.".format(tk.name))
+            area.takeItems(tk)
+        else:
+            print("No '{}' in inventory!".format(item))
 
     def checkForItem(self,item):
-    	return item.capitalize() in self.inventory.keys()
+        for it in self.inventory:
+            if it[0] == item.capitalize():
+                return it
+        return False
 
     def showInventory(self):
         if self.inventory:
-            for item in self.inventory.keys():
-                print("{}".format(item),end=" || ")
-            print()
+            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            print(" || ",end="")
+            for item in self.inventory:
+                print("{}".format(item[0]),end=" || ")
+            
         else:
-            print("There's nothing in your bags.")
-
+            print("There's nothing in your inventory!")
 
 p = player
