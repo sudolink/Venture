@@ -58,19 +58,28 @@ class maps():
 		print("{}".format(self.description))
 		print("\nExits: {}".format(list(self.adjacent_exits.keys())))
 		if self.items:
-			#print(self.items)
+			contained = {}
 			print("\nYou see:")
-			test = " // "
-			for item in self.items.keys():
-				test += (item[0]+" // ")
-			print("{}".format("~"*(len(test))))
-			print(test)
-			print("{}".format("~"*(len(test))))
+			for tup in self.items:
+				if tup[0] not in contained:
+					contained[tup[0]] = 1
+				else:
+					contained[tup[0]] += 1
+
+			print("{}".format("~"*(50)))
+			print("|| ", end="")
+			for name,amount in contained.items():
+				if amount > 1:
+					print("{}x {}".format(amount,name),end=" || ")
+				else:
+					print("{}".format(name),end=" || ")
+			print("\n{}".format("~"*(50)))
+			
 		else:
 			print("\nThere's nothing in this area.")
 
 	def checkForItem(self,item):
-		for it in self.items:
+		for it in self.items.items():
 			if it[0] == item.capitalize():
 				return it
 
@@ -79,12 +88,18 @@ class maps():
 
 
 	def yieldItem(self,item_tuple):
-		give_item = self.items[item_tuple]
-		if give_item.takeable:
-			del self.items[item_tuple]
-			return give_item
+		if item_tuple == "everything":
+			takeables = {item_tuple:item_object for item_tuple,item_object in self.items.items() if item_object.takeable} #return dict of
+			for item_tuple,item_obj in takeables.items():
+				del self.items[item_tuple]
+			return takeables
 		else:
-			print("You can't take that!")
+			give_item = self.items[item_tuple]
+			if give_item.takeable:
+				del self.items[item_tuple]
+				return give_item
+			else:
+				print("You can't take that!")
 ######################################################################################################
 ######################################################################################################
 ######################################################################################################

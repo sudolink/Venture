@@ -101,7 +101,7 @@ def itemPopulator3000(id_num,area=None):
 	id_num = id_num
 
 	for name in item_names: #iterate through item names
-		chance = 33
+		chance = 88
 		if inrange(0,100) < chance: #chance is chance out of 100
 			if checkItemExists(name) == "infoods": #self explanatory
 				if food_in_map < max_food_in_map: #if more food generated than allowed, do nothing
