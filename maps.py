@@ -55,7 +55,7 @@ class maps():
 			self.items[items.name_id] = items
 
 	def describeYourself(self):
-		print("{}".format(self.description))
+		print("\n##\t{}".format(self.description))
 		print("\nExits: {}".format(list(self.adjacent_exits.keys())))
 		if self.items:
 			contained = {}
@@ -79,7 +79,7 @@ class maps():
 			print("\nThere's nothing in this area.")
 
 	def checkForItem(self,item):
-		for it in self.items.items():
+		for it in self.items:
 			if it[0] == item.capitalize():
 				return it
 

@@ -65,7 +65,10 @@ food_list = ["Apple","Beef jerky"]
 food_attributes = ["description","durability","nutrition","unique"]#for readability
 
 foods = {"Apple":{"description":"A juicy red apple","durability":100,"nutrition":15,"unique":False},\
-	"Beef jerky":{"description":"A chewy piece of dried beef","durability":100,"nutrition":20,"unique":False},\
+	"Beef jerky":{"description":"A chewy piece of dried beef","durability":100,"nutrition":25,"unique":False},\
+	"Crickets":{"description":"A crawling bunch of crickets","durability":100,"nutrition":5,"unique":False},\
+	"A Banana":{"description":"A ripe, spotted banana","durability":100,"nutrition":20,"unique":False},\
+	"Berries" : {"description":"A big bowl of berries","durability":100,"nutrition":13,"unique":False},\
 	}
 
 ###############
@@ -75,7 +78,8 @@ weapon_list = ["Wooden dagger","Rusty sword"]
 weapon_attributes = ["description","durability","attack","speed","unique"]#readability
 
 weapons = {"Wooden dagger":{"description":"A wooden splinter resembling a dagger.","durability":100,"attack":0.2,"speed":1.0,"unique":True},\
-	"Rusty sword":{"description":"A sword, encased in rust","durability":50,"attack":0.5,"speed":2.0,"unique":True}
+	"Rusty sword":{"description":"A sword, encased in rust","durability":50,"attack":0.5,"speed":2.0,"unique":True},\
+	"Long hammer":{"description":"A hammer with a long haft for powerful swings. It's heavy.","durability":100,"attack":2,"speed":3.3,"unique":True},\
 	}
 
 ###########################################################################################
@@ -92,7 +96,7 @@ def checkItemExists(name):
 		return False
 
 def itemPopulator3000(id_num,area=None):
-	item_names = [name for name in food_list + weapon_list]
+	item_names = [name for name in foods] + [name for name in weapons]
 	generated_items = []
 	max_weapons_in_map = 1 #use this for controlling max numbers
 	weapons_in_map = 0  #of same-type items in map
@@ -101,7 +105,7 @@ def itemPopulator3000(id_num,area=None):
 	id_num = id_num
 
 	for name in item_names: #iterate through item names
-		chance = 88
+		chance = 22
 		if inrange(0,100) < chance: #chance is chance out of 100
 			if checkItemExists(name) == "infoods": #self explanatory
 				if food_in_map < max_food_in_map: #if more food generated than allowed, do nothing

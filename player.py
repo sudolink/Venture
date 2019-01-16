@@ -18,6 +18,7 @@ class player():
         inAreaTuple = area.checkForItem(item)
         inInventoryTuple = self.checkForItem(item)
 
+
         if inAreaTuple:
             area.items[inAreaTuple].giveDescription()
         elif inInventoryTuple:
@@ -39,9 +40,9 @@ class player():
                 tk = area.yieldItem(item_tuple)
                 self.inventory[item_tuple] = tk
                 print("You put '{}' in your inventory.".format(tk.name))
+                del item_tuple,tk
             else:
                 print("No '{}' around to take.".format(item))
-            del item_tuple,tk
 
     def drop(self,area,item):
         if item in ["everything","all","inventory"]:
@@ -77,4 +78,18 @@ class player():
         else:
             print("There's nothing in your inventory!")
 
-p = player
+
+#working on creatures
+humanoid_names = ["Defias Pillager","Defias Rogue","Kobold digger","Kobold Protector"]
+animal_names = ["Fat rat","Starving dog","Hand-sized spider","Python"]
+
+
+class creature():
+    'The creature class all NPCs are created from'
+    def __init__(self,name):
+        self.name = name
+        self.hp = 100
+        self.attack = 10
+
+    def attack(self,other):
+        other.hp -= self.attack
