@@ -38,6 +38,12 @@ class food(item):
 		super(food, self).__init__(name,undetermined_dict_of_attributes,id_num)
 		self.takeable = True
 		self.unique = False
+		self.edible = True
+
+	def spoil(self):
+		self.durability -= 50
+		if self.durability <= 0:
+			del self
 
 class weapon(item):
 
@@ -67,7 +73,7 @@ food_attributes = ["description","durability","nutrition","unique"]#for readabil
 foods = {"Apple":{"description":"A juicy red apple","durability":100,"nutrition":15,"unique":False},\
 	"Beef jerky":{"description":"A chewy piece of dried beef","durability":100,"nutrition":25,"unique":False},\
 	"Crickets":{"description":"A crawling bunch of crickets","durability":100,"nutrition":5,"unique":False},\
-	"A Banana":{"description":"A ripe, spotted banana","durability":100,"nutrition":20,"unique":False},\
+	"Banana":{"description":"A ripe, spotted banana","durability":100,"nutrition":20,"unique":False},\
 	"Berries" : {"description":"A big bowl of berries","durability":100,"nutrition":13,"unique":False},\
 	}
 

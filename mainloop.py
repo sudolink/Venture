@@ -28,3 +28,4 @@ gField = maps.gameField(player1)
 #main loop
 while True:
 	inputHandler.pinp(player1,gField)
+	gField.passTime()

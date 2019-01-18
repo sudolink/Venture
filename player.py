@@ -1,6 +1,5 @@
  # the player class
 
-
 class player():
     'player class placeholder'
 
@@ -9,7 +8,53 @@ class player():
         self.health = 100
         self.inventory = {}
         self.hunger = 100
-        self.lookInInventory = False
+        self.current_hunger = None
+
+    def hungerRise(self):
+        hunger_levels = [("starving",19),("very hungry",35),("hungry",56),("fed",70)]
+        self.hunger -= 6.5
+        if self.hunger <= 0:
+            print("{} starved to death!".format(self.name))
+            quit()
+        else:
+            for hunger_level in hunger_levels:
+                if self.hunger <= hunger_level[1] and self.current_hunger != hunger_level[1]:
+                    print("{} is {}".format(self.name,hunger_level[0]))
+                    self.current_hunger = hunger_level[0]
+                    break
+
+    def destroyThing(self,other):
+        del self.inventory[other]#requires item tuple
+
+    def eat(self,area=None,meal=None):
+        #if no item specified, then eat whatever is in the vicinity or inventory
+        if not area:
+            print("just eat whatever is available")
+        else:
+        #check if in map or inventory
+            areaItem = area.checkForItem(meal)
+            ownItem = self.checkForItem(meal)
+
+            if self.hunger <= 99:    
+                try:
+                    area.items[areaItem].edible
+                except:
+                    try:
+                        self.inventory[ownItem].edible
+                    except:
+                        print("You can't eat that!")
+                    else:
+                        eatfrominventory = self.inventory[ownItem]
+                        self.hunger += eatfrominventory.nutrition
+                        print("You take the {} from your inventory and eat. You're {}.".format(ownItem[0],self.current_hunger))
+                        self.destroyThing(ownItem)
+                else:
+                    eatfrommap = area.yieldItem(areaItem)
+                    print("You pick up the {} and eat. You're {}.".format(areaItem[0],self.current_hunger))
+                    self.hunger += eatfrommap.nutrition
+                    del eatfrommap
+            else:
+                print("{} is already fully fed!".format(self.name))
 
     def inspect(self,area = None,item = False): #item is a string, area is the maps object
         #use map's item contain checker
@@ -77,7 +122,6 @@ class player():
             
         else:
             print("There's nothing in your inventory!")
-
 
 #working on creatures
 humanoid_names = ["Defias Pillager","Defias Rogue","Kobold digger","Kobold Protector"]

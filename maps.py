@@ -34,6 +34,10 @@ class maps():
 		print("{} enters:".format(self.occupants[player.name].name))####(self.occupants[0].name) because only occupant
 		self.describeYourself()
 
+	def findPlayer(self):
+		for occupant in self.occupants.items():
+			print(occupant)
+
 	def giveOccupant(self,playername,direction):
 		if direction in self.adjacent_exits: #check whether move is valid
 			try:
@@ -55,7 +59,7 @@ class maps():
 			self.items[items.name_id] = items
 
 	def describeYourself(self):
-		print("\n##\t{}".format(self.description))
+		print("\t{}".format(self.description))
 		print("\nExits: {}".format(list(self.adjacent_exits.keys())))
 		if self.items:
 			contained = {}
@@ -109,10 +113,11 @@ class gameField():
 		self.player1 = player1
 		self.currentMap = None #contains the coordinates of the map not the object itself
 		self.numberOfMaps = random.randint(5,25)
-		self.allmapcoords = []
-		self.allmaps = []
+		self.allmapcoords = [] #map coordinates
+		self.allmaps = [] #map objects
 		self.adjacentMaps = {}
 		self.num_items_generated = 0
+		self.passTimeTicks = {"hunger":0,"food":0} #control for passing time function triggers, i.e. every how many player inputs
 		########################################
 		##	gamefield lists
 		######
@@ -135,6 +140,54 @@ class gameField():
 
 		#lastly, give player object to genesis to start the game
 		self.__dict__[self.currentMap[0]][self.currentMap[1]].acceptPlayer(self.player1)
+
+
+	def passTime(self):
+		hunger_trigger = 3  #every how many turns do functions trigger
+		food_trigger = 4
+		#a collection of object functions that time passing should affect
+		area = self.fetchMapObject()
+			#player hunger
+		if self.passTimeTicks["hunger"] >= hunger_trigger:
+			self.player1.hungerRise()
+			self.passTimeTicks["hunger"] = 0
+		if self.passTimeTicks["food"] >= food_trigger:
+			to_rot = []
+			#area
+			for food in area.items:
+				try:
+					area.items[food].spoil()
+				except:
+					pass
+					#print("{} can't spoil".format(food[0]))
+				else:
+					self.passTimeTicks["food"] = 0
+				if area.items[food].durability <= 0:
+					print("{} rotted away!".format(food[0]))
+					to_rot.append(food)
+			if to_rot:
+				for food in to_rot:
+					del area.items[food]
+			#inventory
+			for food in self.player1.inventory:
+				try:
+					self.player1.inventory[food].spoil()
+				except:
+					pass
+					#print("{} can't spoil".format(food[0]))
+				else:
+					self.passTimeTicks["food"] = 0
+				if self.player1.inventory[food].durability <= 0:
+					print("{} rotted away in your inventory!".format(food[0]))
+					to_rot.append(food)
+			if to_rot:
+				for food in to_rot:
+					del self.player1.inventory[food]
+			food_tick = 0
+		#food spoilage
+
+		self.passTimeTicks["hunger"] += 1
+		self.passTimeTicks["food"] += 1
 
 	def fetchMapObject(self,coords=None):#default is to fetch the current map object
 		if coords == None:

@@ -5,8 +5,8 @@ import os
 clearScreen = lambda: os.system('cls')
 
 #command list
-simple_command_names = ["help","look","quit","inventory"]
-complex_command_names = ["inspect","attack","go","take","drop"]
+simple_command_names = ["help","look","quit","inventory","eat"]
+complex_command_names = ["inspect","attack","go","take","drop","eat"]
 
 def quitgame():
 	dontquit = True
@@ -38,7 +38,7 @@ def pinp(player1,gfield):
     area = gfield.fetchMapObject()
     
     command_dict = {"go":gfield.attemptTravel,"look":area.describeYourself,"inspect":player1.inspect,"take":player1.take,\
-        "drop":player1.drop,"help":cmndlst,"quit":quitgame,"inventory":player1.showInventory}
+        "drop":player1.drop,"help":cmndlst,"quit":quitgame,"inventory":player1.showInventory,"eat":player1.eat}
 
 
     inp = str(input("\n> ")).lower()
@@ -67,12 +67,12 @@ def pinp(player1,gfield):
 def validCommand(inp): #check input for valid commands, return noun for further processing.
     for command in simple_command_names + complex_command_names:
         #print(command)
+        if command == inp:
+            return command
         if command == inp and command not in simple_command_names:
             print("\n'{}' needs to be directed at an object.".format(command))
             return False
-        if command == inp:
-            return command
-        elif command in inp and command not in simple_command_names:
+        elif command in inp and command in complex_command_names:
             #strip inp of the command and spaces, leaving the noun
             noun = inp.replace(command," ").strip(" ")
             return (command,noun)
