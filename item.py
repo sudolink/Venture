@@ -41,7 +41,7 @@ class food(item):
 		self.edible = True
 
 	def spoil(self):
-		self.durability -= 50
+		self.durability -= 11
 		if self.durability <= 0:
 			del self
 
@@ -51,6 +51,7 @@ class weapon(item):
 		super(weapon, self).__init__(name,undetermined_dict_of_attributes,id_num)
 		self.unique = True
 		self.takeable = True
+		self.equipable = True
 
 class tool(item):
 	def __init__(self,name,undetermined_dict_of_attributes,container=False):

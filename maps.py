@@ -2,6 +2,7 @@
 
 import random
 import item
+import player
 #randint for integers and uniform for floats, choice for random list picks
 
 #map descriptions
@@ -25,9 +26,11 @@ class maps():
 		self.visited = False
 		self.hasPlayer = False
 		self.adjacent_exits = {}
+		self.player_name = None
 
 	def acceptPlayer(self,player):
 		self.occupants[player.name] = player
+		self.player_name = player.name
 		self.hasPlayer = True
 		if self.visited == False:
 			self.visited = True
@@ -61,9 +64,10 @@ class maps():
 	def describeYourself(self):
 		print("\t{}".format(self.description))
 		print("\nExits: {}".format(list(self.adjacent_exits.keys())))
+		print("\nYou see:")
 		if self.items:
+			print("Items:")
 			contained = {}
-			print("\nYou see:")
 			for tup in self.items:
 				if tup[0] not in contained:
 					contained[tup[0]] = 1
@@ -80,7 +84,15 @@ class maps():
 			print("\n{}".format("~"*(50)))
 			
 		else:
-			print("\nThere's nothing in this area.")
+			print("\nThere's no items in this area.")
+		if len(self.occupants) > 1:
+			print("\nCreatures:")
+			print("{}".format("~"*50))
+			print("|| ",end="")
+			for occupant in self.occupants:
+				if occupant != self.player_name:
+					print("{}".format(occupant),end=" || ")
+			print("\n{}".format("~"*50))
 
 	def checkForItem(self,item):
 		for it in self.items:
@@ -89,6 +101,11 @@ class maps():
 
 		return False
 
+	def checkForOccupant(self,other):
+		for occupant in self.occupants:
+			if occupant == other:
+				return self.occupants[occupant]
+		return False
 
 
 	def yieldItem(self,item_tuple):
@@ -141,6 +158,18 @@ class gameField():
 		#lastly, give player object to genesis to start the game
 		self.__dict__[self.currentMap[0]][self.currentMap[1]].acceptPlayer(self.player1)
 
+	def enterCombatLoop(self,area,who):
+		who = who.capitalize()
+		if area.checkForOccupant(who):
+			#enter combat loop
+			combat = True
+			while combat:
+				#first attack to combat initiatior
+				#then the other party
+				#repeat until either is dead or someone successfully runs away
+				pass
+		else:
+			print("No '{}' around to attack!".format(who))
 
 	def passTime(self):
 		hunger_trigger = 3  #every how many turns do functions trigger
@@ -153,6 +182,7 @@ class gameField():
 			self.passTimeTicks["hunger"] = 0
 		if self.passTimeTicks["food"] >= food_trigger:
 			to_rot = []
+			to_rot_inv = []
 			#area
 			for food in area.items:
 				try:
@@ -179,8 +209,8 @@ class gameField():
 					self.passTimeTicks["food"] = 0
 				if self.player1.inventory[food].durability <= 0:
 					print("{} rotted away in your inventory!".format(food[0]))
-					to_rot.append(food)
-			if to_rot:
+					to_rot_inv.append(food)
+			if to_rot_inv:
 				for food in to_rot:
 					del self.player1.inventory[food]
 			food_tick = 0
@@ -397,6 +427,7 @@ class gameField():
 		genesis_location = (randomrow,randomcoord)
 			#take a random map description, and remove it from list; tell the map where it's located
 		genesis = maps(map_desc.pop(-1),genesis_location,0)
+		genesis.occupants[player.randomoccupant] = player.creature(player.randomoccupant)
 			#if "genesis" is passed to itempopulator3k then at least one food item will be put in map
 		generated_for_genesis = item.itemPopulator3000(self.num_items_generated,"Genesis")
 		self.num_items_generated += len(generated_for_genesis)

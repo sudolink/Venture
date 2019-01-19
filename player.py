@@ -1,4 +1,5 @@
  # the player class
+import random
 
 class player():
     'player class placeholder'
@@ -8,7 +9,17 @@ class player():
         self.health = 100
         self.inventory = {}
         self.hunger = 100
-        self.current_hunger = None
+        self.current_hunger = "Well fed"
+        self.equipped = {"weapon":None,"shield":None,"armor":None}
+        self.attack = 0
+
+    def startAttack(self):        
+        #generate hitchance here
+        hitchance = random.randint(48,70)
+        hit = random.randint(0,100)
+        if hitchance > hit:
+            del hitchance, hit
+            return self.attack + self.equipped["weapon"].attack
 
     def hungerRise(self):
         hunger_levels = [("starving",19),("very hungry",35),("hungry",56),("fed",70)]
@@ -22,6 +33,22 @@ class player():
                     print("{} is {}".format(self.name,hunger_level[0]))
                     self.current_hunger = hunger_level[0]
                     break
+
+    def equipItem(self,area,item):
+        equip = self.checkForItem(item)
+        equippednow = False
+        #determine the type of equipment
+        try:
+            "weapon" in str(type(self.inventory[equip]))
+        except:
+            print("oh oh")
+        else:
+            self.equipped["weapon"] = self.inventory[equip]
+            del self.inventory[equip]
+            equippednow = True
+
+        if equippednow:
+            print("You equipped '{}'".format(equip[0]))
 
     def destroyThing(self,other):
         del self.inventory[other]#requires item tuple
@@ -122,10 +149,16 @@ class player():
             
         else:
             print("There's nothing in your inventory!")
+        print("Equipment:")
+        for equipment in self.equipped.values():
+            if equipment != None:
+                print(equipment.name,end=" ")
 
 #working on creatures
-humanoid_names = ["Defias Pillager","Defias Rogue","Kobold digger","Kobold Protector"]
+humanoid_names = ["Defias pillager","Defias rogue","Kobold digger","Kobold protector"]
 animal_names = ["Fat rat","Starving dog","Hand-sized spider","Python"]
+
+randomoccupant = random.choice(humanoid_names+animal_names)
 
 
 class creature():
@@ -134,6 +167,11 @@ class creature():
         self.name = name
         self.hp = 100
         self.attack = 10
+        self.drops = []
 
     def attack(self,other):
-        other.hp -= self.attack
+        hitchance = random.randint(33,70)
+        hit = random.randint(0,100)
+        if hitchance > hit:
+            other.hp -= self.attack
+        del hitchance, hit
