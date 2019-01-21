@@ -89,6 +89,8 @@ weapons = {"Wooden dagger":{"description":"A wooden splinter resembling a dagger
 	"Long hammer":{"description":"A hammer with a long haft for powerful swings. It's heavy.","durability":100,"attack":2,"speed":3.3,"unique":True},\
 	}
 
+item_placeholder = dict(foods)
+item_placeholder.update(weapons)
 ###########################################################################################
 
 def checkItemExists(name):
@@ -102,35 +104,48 @@ def checkItemExists(name):
 		print("{} isn't in any item lists!".format(name))
 		return False
 
-def itemPopulator3000(id_num,area=None):
+def itemPopulator3000(gfield,item_limit=None,area=None):
 	item_names = [name for name in foods] + [name for name in weapons]
 	generated_items = []
 	max_weapons_in_map = 1 #use this for controlling max numbers
 	weapons_in_map = 0  #of same-type items in map
 	max_food_in_map = 2
 	food_in_map = 0
-	id_num = id_num
 
-	for name in item_names: #iterate through item names
-		chance = 22
-		if inrange(0,100) < chance: #chance is chance out of 100
-			if checkItemExists(name) == "infoods": #self explanatory
-				if food_in_map < max_food_in_map: #if more food generated than allowed, do nothing
-					generated_items.append(food(name,foods[name],id_num))#make item from item attribute dict
-					id_num += 1
-					food_in_map += 1
+	if item_limit == None:
+		for name in item_names: #iterate through item names
+			chance = 22
+			if inrange(0,100) < chance: #chance is chance out of 100
+				if checkItemExists(name) == "infoods": #self explanatory
+					if food_in_map < max_food_in_map: #if more food generated than allowed, do nothing
+						generated_items.append(food(name,foods[name],gfield.num_items_generated))#make item from item attribute dict
+						gfield.num_items_generated += 1
+						food_in_map += 1
+				elif checkItemExists(name) == "inweapons":
+					if weapons_in_map < max_weapons_in_map:
+						generated_items.append(weapon(name,weapons[name],gfield.num_items_generated))
+						gfield.num_items_generated += 1
+						weapons_in_map += 1
+					pass
+				else:
+					pass
+
+		if not generated_items and area=="Genesis": #if no items are generated, generate a food item if it's the genesis map.
+			tmp = random.choice(food_list)
+			generated_items.append(food(tmp,foods[tmp],gfield.num_items_generated))
+			gfield.num_items_generated += 1
+
+		return generated_items
+	else:
+		for num in range(item_limit):
+			name = random.choice([name for name in item_placeholder.keys()])
+			if checkItemExists(name) == "infoods":
+				generated_items.append(food(name,foods[name],gfield.num_items_generated))
+				gfield.num_items_generated += 1
 			elif checkItemExists(name) == "inweapons":
-				if weapons_in_map < max_weapons_in_map:
-					generated_items.append(weapon(name,weapons[name],id_num))
-					id_num += 1
-					weapons_in_map += 1
-				pass
+				generated_items.append(weapon(name,weapons[name],gfield.num_items_generated))
+				gfield.num_items_generated += 1
 			else:
-				pass
+				print("major malfunction")
+		return generated_items
 
-	if not generated_items and area=="Genesis": #if no items are generated, generate a food item if it's the genesis map.
-		tmp = random.choice(food_list)
-		generated_items.append(food(tmp,foods[tmp],id_num))
-		id_num += 1
-
-	return generated_items

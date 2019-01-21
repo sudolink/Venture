@@ -3,7 +3,10 @@
 import random
 import item
 import player
+import os
 #randint for integers and uniform for floats, choice for random list picks
+
+clearScreen = lambda: os.system('cls')
 
 #map descriptions
 map_desc = ["A cold and dark cavern","A deserted kitchen","A dusty bedroom with fresh linens on the bed",\
@@ -41,6 +44,10 @@ class maps():
 		for occupant in self.occupants.items():
 			print(occupant)
 
+	def killOccupant(self,who):
+		print(who.name)
+		del self.occupants[who.name]
+
 	def giveOccupant(self,playername,direction):
 		if direction in self.adjacent_exits: #check whether move is valid
 			try:
@@ -60,6 +67,14 @@ class maps():
 				self.items[item.name_id] = item
 		else:
 			self.items[items.name_id] = items
+
+	def takeOccupants(self,occ):
+		if type(occ) == list:
+			for occupant in occ:
+				
+				self.occupants[occupant.name] = occupant
+		else:
+			self.occupants[occupant.name] = occupant
 
 	def describeYourself(self):
 		print("\t{}".format(self.description))
@@ -134,6 +149,7 @@ class gameField():
 		self.allmaps = [] #map objects
 		self.adjacentMaps = {}
 		self.num_items_generated = 0
+		self.num_occupants_generated = 0
 		self.passTimeTicks = {"hunger":0,"food":0} #control for passing time function triggers, i.e. every how many player inputs
 		########################################
 		##	gamefield lists
@@ -158,16 +174,59 @@ class gameField():
 		#lastly, give player object to genesis to start the game
 		self.__dict__[self.currentMap[0]][self.currentMap[1]].acceptPlayer(self.player1)
 
+	def putPlayerIntoRandomMap(self):
+		mapObj = self.fetchMapObject()
+		goto = random.choice([direction for direction in mapObj.adjacent_exits.keys()])
+		
+		print("\nYou run {}!".format(goto))
+
+		self.attemptTravel(mapObj,goto)
+
 	def enterCombatLoop(self,area,who):
 		who = who.capitalize()
-		if area.checkForOccupant(who):
+		whoObj = area.checkForOccupant(who)
+		print(whoObj)
+		if whoObj:
 			#enter combat loop
-			combat = True
-			while combat:
-				#first attack to combat initiatior
-				#then the other party
-				#repeat until either is dead or someone successfully runs away
-				pass
+			print("You've entered into combat with '{}'".format(who))
+			print("You can either 'attack' or try to 'run' each round.")
+			while whoObj.alive(): #while combatant alive
+				#loop for fight or flight
+				action = None
+				while action not in ["attack","run"]:
+					action = str(input("Attack or run? ")).lower()
+					if action not in ["attack","run"]:
+						print("You can either 'run' or 'attack'!")
+					else:
+						break
+				if action == "run":
+					if random.choice([True,False]):
+						print("You manage to escape!")
+						self.putPlayerIntoRandomMap() #run to an adjacent room
+						break
+					else:
+						print("You couldn't run away!")
+						#get hit
+				else:
+					attempt = 0
+					attempt -= self.player1.attemptAttack() #turn damage negative
+					if attempt:
+						#subtract damage from attackee
+						whoObj.manageHealth(-attempt,area)
+					else:
+						#failed to do damage
+						print("Your attack missed!")
+						pass
+					pass
+					attempt = 0
+					attempt -=  whoObj.attemptAttack()
+					if attempt:
+						#subtract damage from player
+						self.player1.manageHealth(-attempt)
+					else:
+						print("{}'s attack misses!".format(who))
+			print("Combat ended! Your HP: {}".format(self.player1.hp))
+			area.describeYourself()
 		else:
 			print("No '{}' around to attack!".format(who))
 
@@ -223,8 +282,8 @@ class gameField():
 		if coords == None:
 			return self.__dict__[self.currentMap[0]][self.currentMap[1]]
 		else:
-			return self.__dict__[self.coords[0]][self.coords[1]]
-
+			return self.__dict__[coords[0]][coords[1]]
+			#THE ELSE DOESN'T WORK AS INTENDED, FIX IT
 
 	def attemptTravel(self,area,where):
                 if where.lower() in area.adjacent_exits:
@@ -237,9 +296,10 @@ class gameField():
                 	print("There is no exit to the {}!".format(where.capitalize()))
 
 	def fillMap(self,map_instance):
-		new_items = item.itemPopulator3000(self.num_items_generated)
-		self.num_items_generated += len(new_items)
+		new_items = item.itemPopulator3000(self)
+		new_occupants = player.occupantGenerator4000(self)
 		map_instance.takeItems(new_items)
+		map_instance.takeOccupants(new_occupants)
 		#populate with creatures
 
 	def giveMapsExits(self):
@@ -427,10 +487,9 @@ class gameField():
 		genesis_location = (randomrow,randomcoord)
 			#take a random map description, and remove it from list; tell the map where it's located
 		genesis = maps(map_desc.pop(-1),genesis_location,0)
-		genesis.occupants[player.randomoccupant] = player.creature(player.randomoccupant)
+		genesis.occupants[player.randomoccupant] = player.creature(player.randomoccupant,self.num_occupants_generated)
 			#if "genesis" is passed to itempopulator3k then at least one food item will be put in map
-		generated_for_genesis = item.itemPopulator3000(self.num_items_generated,"Genesis")
-		self.num_items_generated += len(generated_for_genesis)
+		generated_for_genesis = item.itemPopulator3000(self,None,"Genesis")
 		genesis.takeItems(generated_for_genesis)
 		self.__dict__[randomrow][randomcoord] = genesis
 		self.allmapcoords.append(genesis_location)

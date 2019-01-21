@@ -1,25 +1,31 @@
  # the player class
 import random
+import item
 
 class player():
     'player class placeholder'
 
     def __init__(self,name="Jesus"):
         self.name = name#str(input("\nEnter player name: \n"))
-        self.health = 100
+        self.hp = 20
         self.inventory = {}
         self.hunger = 100
         self.current_hunger = "Well fed"
         self.equipped = {"weapon":None,"shield":None,"armor":None}
-        self.attack = 0
+        self.attack = 40
 
-    def startAttack(self):        
+    def attemptAttack(self):        
         #generate hitchance here
         hitchance = random.randint(48,70)
-        hit = random.randint(0,100)
-        if hitchance > hit:
-            del hitchance, hit
-            return self.attack + self.equipped["weapon"].attack
+        tohit = random.randint(0,100)
+        if hitchance > tohit:
+            del hitchance, tohit
+            if self.equipped["weapon"]: #if weapon equipped, add its damage to attack
+                return -self.attack - self.equipped["weapon"].attack
+            else:
+                return -self.attack
+        else:
+            return False
 
     def hungerRise(self):
         hunger_levels = [("starving",19),("very hungry",35),("hungry",56),("fed",70)]
@@ -33,6 +39,15 @@ class player():
                     print("{} is {}".format(self.name,hunger_level[0]))
                     self.current_hunger = hunger_level[0]
                     break
+
+    def manageHealth(self,adjust):
+        self.hp += adjust
+        if self.hp < 1:
+            print("{} was mortally wounded!".format(self.name))
+            quit()
+        else:
+            print("{}'s HP: {}".format(self.name,self.hp))
+
 
     def equipItem(self,area,item):
         equip = self.checkForItem(item)
@@ -73,7 +88,9 @@ class player():
                     else:
                         eatfrominventory = self.inventory[ownItem]
                         self.hunger += eatfrominventory.nutrition
+                        self.hp += eatfrominventory.nutrition / 2
                         print("You take the {} from your inventory and eat. You're {}.".format(ownItem[0],self.current_hunger))
+                        print("You healed for {}. HP: {}".format(eatfrominventory.nutrition/2, self.hp))
                         self.destroyThing(ownItem)
                 else:
                     eatfrommap = area.yieldItem(areaItem)
@@ -163,15 +180,62 @@ randomoccupant = random.choice(humanoid_names+animal_names)
 
 class creature():
     'The creature class all NPCs are created from'
-    def __init__(self,name):
+    def __init__(self,name,id_num):
+        self.id = id_num
         self.name = name
+        print(self.name)
         self.hp = 100
-        self.attack = 10
-        self.drops = []
+        self.attack = 3
+        self.equipped = {"weapon":None,"shield":None,"armor":None}
+        self.drops = {}
+        self.dead = False
 
-    def attack(self,other):
-        hitchance = random.randint(33,70)
-        hit = random.randint(0,100)
-        if hitchance > hit:
-            other.hp -= self.attack
-        del hitchance, hit
+    def attemptAttack(self):
+        hitchance = random.randint(48,70)
+        tohit = random.randint(0,100)
+        if hitchance > tohit:
+            del hitchance, tohit
+            if self.equipped["weapon"]: #if weapon equipped, add its damage to attack
+                return -self.attack - self.equipped["weapon"].attack
+            else:
+                return -self.attack
+        else:
+            return False
+    def dropItems(self,areaMap):
+        for dropname,drop in self.drops.items():
+            areaMap.items[dropname] = drop
+        print("{} dropped:".format(self.name))
+        print("{}".format([x[0] for x in self.drops]))
+
+    def alive(self):
+        if self.hp >= 1:
+            return True
+        else:
+            False
+
+    def manageHealth(self,adjust,areaMap):
+        self.hp += adjust
+        if self.hp < 1:
+            print("{} killed!".format(self.name))
+            self.dropItems(areaMap)
+            areaMap.killOccupant(self)
+        else:
+            print("{}'s HP: {}".format(self.name,self.hp))
+            #drop items
+
+def occupantGenerator4000(gfield):
+    occupant_list = []
+    random_occupant_num = random.randint(0,3)
+    #make occupants
+    while len(occupant_list) < random_occupant_num:
+        creature_obj = creature(random.choice(humanoid_names+animal_names),gfield.num_occupants_generated)
+        if creature_obj.name not in [occ.name for occ in occupant_list]:
+            creature_items = item.itemPopulator3000(gfield,random.randint(0,2))
+            creature_obj.drops = {(item.name,item.name_id):item for item in creature_items}
+
+            occupant_list.append(creature_obj)
+            gfield.num_occupants_generated += 1
+    #print([occ.name for occ in occupant_list])
+    return occupant_list
+    #append to list
+    #give occupants drops
