@@ -30,6 +30,7 @@ class maps():
 		self.hasPlayer = False
 		self.adjacent_exits = {}
 		self.player_name = None
+		self.rounds_in_map = 0 #for the passTimeFunction in gField
 
 	def acceptPlayer(self,player):
 		self.occupants[player.name] = player
@@ -45,7 +46,6 @@ class maps():
 			print(occupant)
 
 	def killOccupant(self,who):
-		print(who.name)
 		del self.occupants[who.name]
 
 	def giveOccupant(self,playername,direction):
@@ -150,7 +150,7 @@ class gameField():
 		self.adjacentMaps = {}
 		self.num_items_generated = 0
 		self.num_occupants_generated = 0
-		self.passTimeTicks = {"hunger":0,"food":0} #control for passing time function triggers, i.e. every how many player inputs
+		self.passTimeTicks = {"hunger":0,"food":0,"regeneration":0} #control for passing time function triggers, i.e. every how many player inputs
 		########################################
 		##	gamefield lists
 		######
@@ -185,16 +185,18 @@ class gameField():
 	def enterCombatLoop(self,area,who):
 		who = who.capitalize()
 		whoObj = area.checkForOccupant(who)
-		print(whoObj)
 		if whoObj:
 			#enter combat loop
-			print("You've entered into combat with '{}'".format(who))
-			print("You can either 'attack' or try to 'run' each round.")
+			clearScreen()
+			print("You've entered into combat with '{}'!".format(who))
+			print("You can either attempt an 'attack' or 'run' each round.")
+			print("Your HP is: {}".format(self.player1.hp))
 			while whoObj.alive(): #while combatant alive
 				#loop for fight or flight
 				action = None
 				while action not in ["attack","run"]:
-					action = str(input("Attack or run? ")).lower()
+					action = str(input("\nAttack or run? ")).lower()
+					clearScreen()
 					if action not in ["attack","run"]:
 						print("You can either 'run' or 'attack'!")
 					else:
@@ -212,12 +214,12 @@ class gameField():
 					attempt -= self.player1.attemptAttack() #turn damage negative
 					if attempt:
 						#subtract damage from attackee
-						whoObj.manageHealth(-attempt,area)
+						if whoObj.manageHealth(-attempt,area) == False:
+							break
 					else:
 						#failed to do damage
 						print("Your attack missed!")
-						pass
-					pass
+				
 					attempt = 0
 					attempt -=  whoObj.attemptAttack()
 					if attempt:
@@ -225,58 +227,94 @@ class gameField():
 						self.player1.manageHealth(-attempt)
 					else:
 						print("{}'s attack misses!".format(who))
-			print("Combat ended! Your HP: {}".format(self.player1.hp))
+			print("Combat ended! Your HP: {}\n\n".format(self.player1.hp))
 			area.describeYourself()
 		else:
 			print("No '{}' around to attack!".format(who))
 
-	def passTime(self):
-		hunger_trigger = 3  #every how many turns do functions trigger
-		food_trigger = 4
-		#a collection of object functions that time passing should affect
+	def combatQueue(self):
 		area = self.fetchMapObject()
-			#player hunger
-		if self.passTimeTicks["hunger"] >= hunger_trigger:
-			self.player1.hungerRise()
-			self.passTimeTicks["hunger"] = 0
-		if self.passTimeTicks["food"] >= food_trigger:
-			to_rot = []
-			to_rot_inv = []
-			#area
-			for food in area.items:
-				try:
-					area.items[food].spoil()
-				except:
-					pass
-					#print("{} can't spoil".format(food[0]))
-				else:
-					self.passTimeTicks["food"] = 0
-				if area.items[food].durability <= 0:
-					print("{} rotted away!".format(food[0]))
-					to_rot.append(food)
-			if to_rot:
-				for food in to_rot:
-					del area.items[food]
-			#inventory
-			for food in self.player1.inventory:
-				try:
-					self.player1.inventory[food].spoil()
-				except:
-					pass
-					#print("{} can't spoil".format(food[0]))
-				else:
-					self.passTimeTicks["food"] = 0
-				if self.player1.inventory[food].durability <= 0:
-					print("{} rotted away in your inventory!".format(food[0]))
-					to_rot_inv.append(food)
-			if to_rot_inv:
-				for food in to_rot:
-					del self.player1.inventory[food]
-			food_tick = 0
-		#food spoilage
+		combatants = {}
+		combatants.update(area.occupants)
+		del combatants[self.player1.name]#remove player from combatants
+		for combatant in combatants:
+			self.enterCombatLoop(area,combatant)
 
+
+	def passTime(self,combat=False):
+
+		#function triggers
+		if combat:
+			hunger_trigger = 1 #hunger falls faster in combat
+			combat_trigger = 1
+		else:
+			hunger_trigger = 3
+			food_trigger = 10
+			combat_trigger = 3
+			regeneration_trigger = 4
+		
+
+		area = self.fetchMapObject()
+
+		if combat:
+			if self.passTimeTicks["hunger"] >= hunger_trigger:
+				self.player1.hungerRise()
+				self.passTimeTicks["hunger"] = 0
+
+		else:
+			if self.passTimeTicks["regeneration"]:
+				self.player1.hp += 3
+
+			if self.passTimeTicks["hunger"] >= hunger_trigger:
+				self.player1.hungerRise()
+				self.passTimeTicks["hunger"] = 0
+
+			if self.passTimeTicks["food"] >= food_trigger:
+				to_rot = []
+				to_rot_inv = []
+				#area
+				for food in area.items:
+					try:
+						area.items[food].spoil()
+					except:
+						pass
+						#print("{} can't spoil".format(food[0]))
+					else:
+						self.passTimeTicks["food"] = 0
+					if area.items[food].durability <= 0:
+						print("{} rotted away!".format(food[0]))
+						to_rot.append(food)
+				if to_rot:
+					for food in to_rot:
+						del area.items[food]
+				#inventory
+				for food in self.player1.inventory:
+					try:
+						self.player1.inventory[food].spoil()
+					except:
+						pass
+						#print("{} can't spoil".format(food[0]))
+					else:
+						self.passTimeTicks["food"] = 0
+					if self.player1.inventory[food].durability <= 0:
+						print("{} rotted away in your inventory!".format(food[0]))
+						to_rot_inv.append(food)
+				if to_rot_inv:
+					for food in to_rot:
+						del self.player1.inventory[food]
+				food_tick = 0
+			if area.rounds_in_map >= combat_trigger:
+				#make combat queue for occupants in map
+				#initiate combat
+				self.combatQueue()
+				pass
+
+			self.passTimeTicks["food"] += 1
+		
+		#increment these regardless if in combat or not:
+		area.rounds_in_map += 1
 		self.passTimeTicks["hunger"] += 1
-		self.passTimeTicks["food"] += 1
+		
 
 	def fetchMapObject(self,coords=None):#default is to fetch the current map object
 		if coords == None:
@@ -292,6 +330,7 @@ class gameField():
                         y = travelto[1]
                         self.currentMap = self.__dict__[x][y].location
                         self.__dict__[x][y].acceptPlayer(self.player1)
+                        self.passTimeTicks["combat"] = 0 #reset combat trigger
                 else:
                 	print("There is no exit to the {}!".format(where.capitalize()))
 

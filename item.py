@@ -39,6 +39,12 @@ class food(item):
 		self.takeable = True
 		self.unique = False
 		self.edible = True
+		try:
+			self.regeneration == int
+		except:
+			pass
+		else:
+			self.regeneration = random.randint(20,55)
 
 	def spoil(self):
 		self.durability -= 11
@@ -76,6 +82,7 @@ foods = {"Apple":{"description":"A juicy red apple","durability":100,"nutrition"
 	"Crickets":{"description":"A crawling bunch of crickets","durability":100,"nutrition":5,"unique":False},\
 	"Banana":{"description":"A ripe, spotted banana","durability":100,"nutrition":20,"unique":False},\
 	"Berries" : {"description":"A big bowl of berries","durability":100,"nutrition":13,"unique":False},\
+	"Health potion": {"description":"A bottle of red liquid","durability":100,"nutrition":20,"regeneration":0},\
 	}
 
 ###############

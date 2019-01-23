@@ -46,7 +46,7 @@ class player():
             print("{} was mortally wounded!".format(self.name))
             quit()
         else:
-            print("{}'s HP: {}".format(self.name,self.hp))
+            print("{} recieves {} damage. HP remaining: {}".format(self.name,abs(adjust),self.hp))
 
 
     def equipItem(self,area,item):
@@ -58,17 +58,21 @@ class player():
         except:
             print("oh oh")
         else:
+            if self.equipped["weapon"] != None:
+                self.take(area,self.equipped["weapon"],True)
             self.equipped["weapon"] = self.inventory[equip]
             del self.inventory[equip]
             equippednow = True
 
         if equippednow:
             print("You equipped '{}'".format(equip[0]))
+        self.showInventory()
 
     def destroyThing(self,other):
         del self.inventory[other]#requires item tuple
 
     def eat(self,area=None,meal=None):
+        hpchange = 0
         #if no item specified, then eat whatever is in the vicinity or inventory
         if not area:
             print("just eat whatever is available")
@@ -88,50 +92,77 @@ class player():
                     else:
                         eatfrominventory = self.inventory[ownItem]
                         self.hunger += eatfrominventory.nutrition
-                        self.hp += eatfrominventory.nutrition / 2
+                        hpchange += eatfrominventory.nutrition / 2
+                        try:
+                            eatfrominventory.regeneration == int
+                        except:
+                            pass
+                        else:
+                            hpchange += eatfrominventory.regeneration
+                        self.hp += hpchange
                         print("You take the {} from your inventory and eat. You're {}.".format(ownItem[0],self.current_hunger))
-                        print("You healed for {}. HP: {}".format(eatfrominventory.nutrition/2, self.hp))
+                        print("You healed for {}. HP: {}".format(hpchange, self.hp))
                         self.destroyThing(ownItem)
                 else:
                     eatfrommap = area.yieldItem(areaItem)
                     print("You pick up the {} and eat. You're {}.".format(areaItem[0],self.current_hunger))
                     self.hunger += eatfrommap.nutrition
+                    hpchange += eatfrommap.nutrition / 2
+                    try:
+                        eatfrommap.regeneration == int
+                    except:
+                        pass
+                    else:
+                        hpchange += eatfrommap.regeneration
+                    print("You pick up {} and eat. You're {}.".format(areaItem[0],self.current_hunger))
+                    print("You healed for {}. HP: {}".format(hpchange, self.hp))
                     del eatfrommap
             else:
                 print("{} is already fully fed!".format(self.name))
 
     def inspect(self,area = None,item = False): #item is a string, area is the maps object
-        #use map's item contain checker
-        #use player's item contain checker
-        #else no 'item' around
-        inAreaTuple = area.checkForItem(item)
-        inInventoryTuple = self.checkForItem(item)
-
-
-        if inAreaTuple:
-            area.items[inAreaTuple].giveDescription()
-        elif inInventoryTuple:
-            self.inventory[inInventoryTuple].giveDescription()
+        if item.lower() == "self":
+            print("HP: {}".format(self.hp))
+            print("Damage: {}".format(self.attack))
+            print("Equipped: {}".format([equipped.name for name,equipped in self.equipped.items() if equipped != None]))
+            print("Energy level: {}%".format(self.hunger))
         else:
-            print("No {} around.".format(item))
+            #use map's item contain checker
+            #use player's item contain checker
+            #else no 'item' around
+            inAreaTuple = area.checkForItem(item)
+            inInventoryTuple = self.checkForItem(item)
 
-        del inAreaTuple,inInventoryTuple
 
-    def take(self,area,item):
+            if inAreaTuple:
+                area.items[inAreaTuple].giveDescription()
+            elif inInventoryTuple:
+                self.inventory[inInventoryTuple].giveDescription()
+            else:
+                print("No {} around.".format(item))
+
+            del inAreaTuple,inInventoryTuple
+
+    def take(self,area,item,unequipping = False):
         if item in ["everything","all"]:
             tkall = area.yieldItem("everything") #returns map's whole inventory dictionary
             for it_tup, it_ob in tkall.items(): #item tuple - item object
                 self.inventory[it_tup] = it_ob
                 print("You put '{}' in your inventory.".format(it_ob.name))
         else:
-            item_tuple = area.checkForItem(item)
-            if item_tuple:
-                tk = area.yieldItem(item_tuple)
-                self.inventory[item_tuple] = tk
-                print("You put '{}' in your inventory.".format(tk.name))
-                del item_tuple,tk
-            else:
-                print("No '{}' around to take.".format(item))
+            if unequipping:
+                for slot,obj in self.equipped.items():
+                    if obj == item:
+                        self.inventory[item.name_id] = item
+            else:    
+                item_tuple = area.checkForItem(item)
+                if item_tuple:
+                    tk = area.yieldItem(item_tuple)
+                    self.inventory[item_tuple] = tk
+                    print("You put '{}' in your inventory.".format(tk.name))
+                    del item_tuple,tk
+                else:
+                    print("No '{}' around to take.".format(item))
 
     def drop(self,area,item):
         if item in ["everything","all","inventory"]:
@@ -170,6 +201,7 @@ class player():
         for equipment in self.equipped.values():
             if equipment != None:
                 print(equipment.name,end=" ")
+        print("\n\n")
 
 #working on creatures
 humanoid_names = ["Defias pillager","Defias rogue","Kobold digger","Kobold protector"]
@@ -183,7 +215,7 @@ class creature():
     def __init__(self,name,id_num):
         self.id = id_num
         self.name = name
-        print(self.name)
+        #print(self.name) #prints creature name on initialization
         self.hp = 100
         self.attack = 3
         self.equipped = {"weapon":None,"shield":None,"armor":None}
@@ -204,8 +236,10 @@ class creature():
     def dropItems(self,areaMap):
         for dropname,drop in self.drops.items():
             areaMap.items[dropname] = drop
-        print("{} dropped:".format(self.name))
-        print("{}".format([x[0] for x in self.drops]))
+
+        if self.drops:
+            print("{} dropped:".format(self.name))
+            print("{}".format([x[0] for x in self.drops]))
 
     def alive(self):
         if self.hp >= 1:
@@ -219,8 +253,9 @@ class creature():
             print("{} killed!".format(self.name))
             self.dropItems(areaMap)
             areaMap.killOccupant(self)
+            return False
         else:
-            print("{}'s HP: {}".format(self.name,self.hp))
+            print("{} recieves {} damage.".format(self.name,abs(adjust)))
             #drop items
 
 def occupantGenerator4000(gfield):
