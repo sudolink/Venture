@@ -7,12 +7,12 @@ class player():
 
     def __init__(self,name="Jesus"):
         self.name = name#str(input("\nEnter player name: \n"))
-        self.hp = 20
+        self.hp = 2000
         self.inventory = {}
         self.hunger = 100
         self.current_hunger = "Well fed"
         self.equipped = {"weapon":None,"shield":None,"armor":None}
-        self.attack = 40
+        self.attack = 400
 
     def attemptAttack(self):        
         #generate hitchance here
@@ -247,12 +247,13 @@ class creature():
         else:
             False
 
-    def manageHealth(self,adjust,areaMap):
+    def manageHealth(self,adjust,areaMap,gfield):
         self.hp += adjust
         if self.hp < 1:
             print("{} killed!".format(self.name))
             self.dropItems(areaMap)
             areaMap.killOccupant(self)
+            gfield.num_occupants_generated -= 1
             return False
         else:
             print("{} recieves {} damage.".format(self.name,abs(adjust)))

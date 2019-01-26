@@ -29,3 +29,8 @@ gField = maps.gameField(player1)
 while True:
 	inputHandler.pinp(player1,gField)
 	gField.passTime()
+	if gField.checkWinCondish():
+		break
+
+clearScreen()
+print("\t\tCongratulations! You've won the game!")

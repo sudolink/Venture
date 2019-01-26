@@ -144,7 +144,7 @@ class gameField():
 	def __init__(self,player1):
 		self.player1 = player1
 		self.currentMap = None #contains the coordinates of the map not the object itself
-		self.numberOfMaps = random.randint(5,25)
+		self.numberOfMaps = random.randint(3,5)
 		self.allmapcoords = [] #map coordinates
 		self.allmaps = [] #map objects
 		self.adjacentMaps = {}
@@ -214,7 +214,7 @@ class gameField():
 					attempt -= self.player1.attemptAttack() #turn damage negative
 					if attempt:
 						#subtract damage from attackee
-						if whoObj.manageHealth(-attempt,area) == False:
+						if whoObj.manageHealth(-attempt,area,self) == False: #pass self argument at the end so maps can manipulate gField's occupant numbers
 							break
 					else:
 						#failed to do damage
@@ -527,6 +527,7 @@ class gameField():
 			#take a random map description, and remove it from list; tell the map where it's located
 		genesis = maps(map_desc.pop(-1),genesis_location,0)
 		genesis.occupants[player.randomoccupant] = player.creature(player.randomoccupant,self.num_occupants_generated)
+		self.num_occupants_generated += 1
 			#if "genesis" is passed to itempopulator3k then at least one food item will be put in map
 		generated_for_genesis = item.itemPopulator3000(self,None,"Genesis")
 		genesis.takeItems(generated_for_genesis)
@@ -534,3 +535,9 @@ class gameField():
 		self.allmapcoords.append(genesis_location)
 		self.allmaps.append(genesis)
 		self.currentMap = genesis_location
+
+
+	def checkWinCondish(self):
+		#player has killed all the occupants
+		if self.num_occupants_generated  <= 0:
+			return True

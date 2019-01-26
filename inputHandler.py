@@ -44,6 +44,7 @@ def pinp(player1,gfield):
 
     inp = str(input("\n> ")).lower()
     clearScreen()
+    print(gfield.num_occupants_generated)
     inp = validCommand(inp)
     if inp:
         #check if simple
