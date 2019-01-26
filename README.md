@@ -29,7 +29,17 @@ There will be a time factor; the player's hunger will increase, impacting their 
 
 Combat will of course be turn-based, again with an element of randomness.
 
-I want to have an option to save the game state so the player can quit and return to where they left off.
-I will probably need to look into setting up some kind of database; I doubt it's cleanly doable with a simple text file.
 
-The goal for now is to explore every room and survive.
+
+
+FINISHED:
+
+Stopping work on this game.
+It has now become a hacky mess and has fulfilled its purpose.
+I worked on this for around two weeks, figuring out how to design and make the systems in it work properly was fun and educating.
+I relied on google minimally so I'm content to stop working on this and leave it as is. It's evident it's not a complete game, there aren't enough items in the game, the mobs are equally undiverse and the combat is basic. The winning scenario is also dull (kill every mob).
+I learned a good deal as I worked at this, more than anything: persistance is integral in anything you want to accomplish.
+
+I also learned how important planning the code is. Thinking about how to approach a problem and writing it out is so damn helpful, as opposed to brute forcing the solution, the coding part just flows. In fact, the most difficult part of programming is figuring out the logic of how to do something, the coding part couldn't be easier if you know the language somewhat.
+
+I doubt anyone will ever stumble over this repo, but if they do, view it as an amateur's sojourn.

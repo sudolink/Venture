@@ -5,7 +5,7 @@ import os
 clearScreen = lambda: os.system('cls')
 
 #command list
-simple_command_names = ["help","look","quit","inventory"]
+simple_command_names = ["help","look","quit","inventory","map"]
 complex_command_names = ["inspect","attack","go","take","drop","eat","equip","attack"]
 
 def quitgame():
@@ -27,10 +27,10 @@ def cmndlst():
     print("\n\t## List of usable commands ##")
     print("\n\t#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print("\n\t## SIMPLE COMMANDS (need no verb)")
-    print("\n\t## help - look - quit - inventory")
+    print("\n\t## help - look - quit - inventory - map")
     print("\n\t##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print("\n\t## COMPLEX COMMANDS (direct them at something)")
-    print("\n\t## inspect - take - attack - take - drop")
+    print("\n\t## inspect - take - attack - drop - eat - go - equip")
     print("\n\t##+++++++++++++++++++++++++++++++++++++++++++++++\n\n\n")
 #player input handling function
 def pinp(player1,gfield):
@@ -39,12 +39,12 @@ def pinp(player1,gfield):
     
     command_dict = {"go":gfield.attemptTravel,"look":area.describeYourself,"inspect":player1.inspect,"take":player1.take,\
         "drop":player1.drop,"help":cmndlst,"quit":quitgame,"inventory":player1.showInventory,"eat":player1.eat,"equip":player1.equipItem,\
-        "attack":gfield.enterCombatLoop}
+        "attack":gfield.enterCombatLoop, "map":gfield.showGrid}
 
 
     inp = str(input("\n> ")).lower()
     clearScreen()
-    print(gfield.num_occupants_generated)
+    #print(gfield.num_occupants_generated) #PRINT CREATURES LEFT TO KILL
     inp = validCommand(inp)
     if inp:
         #check if simple

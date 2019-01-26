@@ -144,7 +144,7 @@ class gameField():
 	def __init__(self,player1):
 		self.player1 = player1
 		self.currentMap = None #contains the coordinates of the map not the object itself
-		self.numberOfMaps = random.randint(3,5)
+		self.numberOfMaps = random.randint(4,25)
 		self.allmapcoords = [] #map coordinates
 		self.allmaps = [] #map objects
 		self.adjacentMaps = {}
@@ -488,7 +488,7 @@ class gameField():
 
 
 
-	def showGrid(self,switch=None):
+	def showGrid(self,switch="slots"):
 		print("\nTESTING! This will be the game map")
 		print("Currently shows each map's ID")
 		rows = {k:v for k,v in self.__dict__.items() if "row" in k}

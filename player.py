@@ -6,13 +6,13 @@ class player():
     'player class placeholder'
 
     def __init__(self,name="Jesus"):
-        self.name = name#str(input("\nEnter player name: \n"))
-        self.hp = 2000
+        self.name = str(input("\nEnter player name: \n"))
+        self.hp = 44
         self.inventory = {}
         self.hunger = 100
         self.current_hunger = "Well fed"
         self.equipped = {"weapon":None,"shield":None,"armor":None}
-        self.attack = 400
+        self.attack = 40
 
     def attemptAttack(self):        
         #generate hitchance here
@@ -216,7 +216,7 @@ class creature():
         self.id = id_num
         self.name = name
         #print(self.name) #prints creature name on initialization
-        self.hp = 100
+        self.hp = 88
         self.attack = 3
         self.equipped = {"weapon":None,"shield":None,"armor":None}
         self.drops = {}
