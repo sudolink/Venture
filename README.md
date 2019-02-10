@@ -32,7 +32,7 @@ Combat will of course be turn-based, again with an element of randomness.
 
 IMPLEMENTED COMMANDS:
 
-look - gives and area's description
+look - gives an area's description
 
 go [north,east,south,west] - self explanatory, move through areas
 
