@@ -30,6 +30,17 @@ There will be a time factor; the player's hunger will increase, impacting their 
 Combat will of course be turn-based, again with an element of randomness.
 
 
+IMPLEMENTED COMMANDS:
+
+go [north,east,south,west] - self explanatory, move through areas
+take [thing, all] - pick up something (or everything) and put it in your inventory
+attack [who] - start combat loop with creature
+              (in combat loop) attack - attempt to deal damage, run - attempt to run from combat
+drop [thing, all] - drop something (or everything) from inventory to the area you're currently in
+eat [thing] - eat a food item that's contained in your inventory or the current area
+equip / unequip [thing] - equip an equippable item (armor,weapon), which increases your combat related stats
+
+
 
 
 FINISHED:
