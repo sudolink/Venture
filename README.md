@@ -30,7 +30,13 @@ There will be a time factor; the player's hunger will increase, impacting their 
 Combat will of course be turn-based, again with an element of randomness.
 
 
+
+
 IMPLEMENTED COMMANDS:
+
+
+
+
 
 look - gives an area's description
 
@@ -57,7 +63,11 @@ quit - quit the game
 
 
 
+
+
+
 FINISHED:
+
 
 Stopping work on this game.
 It has now become a hacky mess and has fulfilled its purpose.
